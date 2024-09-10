@@ -1,0 +1,104 @@
+* {
+    padding: 0;
+    margin: 0;
+    color: #fff;
+    outline: 2px solid green !important;
+}
+
+html {height: 100%;}
+button {cursor: pointer;}
+
+ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+}
+
+a:hover {color: #fff;}
+
+body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ----------------------Стили для шапки сайта--------------------- */
+header {
+    width: 100%;
+    min-height: 50px;
+    height: auto;
+    flex: 0 0 auto;
+    background: black;
+    z-index: 5;
+    color: rgb(255, 255, 255);
+    border-bottom: 1px solid rgb(48, 48, 48);
+    padding: 10px;
+}
+
+.header-container {
+    margin: 10px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.header-container a {
+    font-size: 20px;
+}
+
+
+/* ----------------------------Стили для блока маин ----------------------*/
+main {
+    padding: 30px; 
+    display: flex;
+    flex: 1 0 auto;
+    background-color: rgb(20, 20, 23);
+    padding: 100px 50px;
+}
+
+.main-info {
+    min-height: 300px;
+    width: 1000px;
+    height: auto;
+    text-align: start;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.main-h1 {
+    width: 70vw;
+}
+
+.main-h1 h1 {
+    font-size: 55px;
+    font-weight: 800;
+}
+
+.main-p {
+    font-size: 25px;
+    width: 60vw;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+
+}
+
+
+
+/* ----------------------------Стили для футера-------------------------- */
+
+footer {
+    background-color: rgb(0, 0, 0);
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+}
