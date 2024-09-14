@@ -1,22 +1,14 @@
+{% extends 'login.html' %}
 {% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link type="text/css" href="{% static 'users/css/users_style.css' %}" rel="stylesheet" />
-    <title>{{ title }}</title>
-</head>
-<body>
-    <form method="post">
-        {% csrf_token %}
-        <h1>Welcome to Dogehype</h1>
-        {% for f in form %}
-            <p><label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</p>
-            <div class="form-error">{{ f.errors }}</div>
-        {% endfor %}
-        <p><button type="submit">register</button></p>
-
-    </form>
-</body>
-</html>
+{% block content_users %}
+<h2>Welcome to Dogehype</h2>
+            <form method="post">
+                    {% csrf_token %}
+                    <div class="form-error">{{ form.non_field_errors }}</div>
+                    {% for f in form %}
+                        <p><label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}</p>
+                        <div class="form-error">{{ f.errors }}</div>
+                    {% endfor %}
+                <button type="submit" class="login-btn">Register</button>
+            </form>
+{% endblock content_users %}

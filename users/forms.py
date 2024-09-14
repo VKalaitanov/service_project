@@ -4,18 +4,11 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 
 class LoginUserForm(AuthenticationForm):
-    password = forms.CharField(label="Password",
-                               widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'class': 'form-input'}))
 
     class Meta:
         model = get_user_model()
         fields = ['email', 'password']
-        labels = {
-            'email': "E-mail"
-        }
-        widgets = {
-            'email': forms.TextInput(attrs={'placeholder': 'Enter Your Email Address'}),
-        }
 
 
 class RegisterUserForm(UserCreationForm):

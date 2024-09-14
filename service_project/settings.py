@@ -49,6 +49,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
+            BASE_DIR / 'users' / 'templates' / 'users',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -125,6 +126,7 @@ AUTH_USER_MODEL = 'users.CustomerUser'
 AUTHENTICATION_BACKENDS = [
     'users.authentication.EmailAuthBackend',
 ]
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_HOST = "smtp.yandex.ru"
 EMAIL_PORT = 465

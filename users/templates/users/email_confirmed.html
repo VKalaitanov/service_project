@@ -1,0 +1,6 @@
+{% extends 'login.html' %}
+
+{% block content_users %}
+<h1 style="font-size: 15px">Поздравляем! <br>Ваш профиль активирован.</h1>
+<h1 style="font-size: 15px"><a href="{% url 'users:login' %}">Войти</a></h1>
+{% endblock %}

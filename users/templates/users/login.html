@@ -4,19 +4,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link type="text/css" href="{% static 'users/css/users_style.css' %}" rel="stylesheet" />
-    <title>{{ title }}</title>
+    <title>Login - Dogehype</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <form method="post">
-        {% csrf_token %}
-        <h1>Welcome to Dogehype</h1>
-        {% for f in form %}
-            <p><label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}</p>
-            <div class="form-error">{{ f.errors }}</div>
-        {% endfor %}
-        <p><button type="submit">Sign in system</button></p>
-
-    </form>
+    <div class="login-container">
+        <div class="login-card">
+            <img src="/media/icon_dog.png" alt="Doge Logo" class="logo">
+            {% block content_users %}
+            <h2>Welcome to Dogehype</h2>
+            <form method="post">
+                    {% csrf_token %}
+                    <div class="form-error">{{ form.non_field_errors }}</div>
+                    {% for f in form %}
+                        <p><label class="form-label" for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}</p>
+                        <div class="form-error">{{ f.errors }}</div>
+                    {% endfor %}
+                <button type="submit" class="login-btn">Sign in system</button>
+            </form>
+            <div class="or-divider">OR</div>
+            <button class="google-btn">
+                <img src="/media/google-logo.png" alt="Google Logo">
+                Sign in with Google
+            </button>
+            <p class="secured-by"><a href="{% url 'users:register' %}">Зарегистрироваться</a></p>
+            {% endblock content_users %}
+        </div>
+    </div>
 </body>
 </html>
