@@ -2,8 +2,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -48,16 +49,20 @@ class RegisterUser(CreateView):
         return super().form_valid(form)
 
     def send_message_by_email(self, current_site, activation_url, user):
-        recipient_list = [user.email]
-        subject = 'Подтвердите свой электронный адрес'
-        message = (
-            f'Активация email на сайте {current_site}, если вы не регистрировались \n'
-            f'на нашем сайте, игнорируйте это сообщение. \n'
-            f'Иначе пожалуйста, перейдите по следующей ссылке, чтобы подтвердить \n'
-            f'свой адрес электронной почты: https://{current_site}{activation_url}'
+        subject = "Verify your account - Dogehype"  # Тема письма
+        recipient_list = [user.email]  # список получателей
+
+        html_message = render_to_string(
+            'email_template.html',
+            context={"activate_url": f'http://{current_site}{activation_url}',
+                     "image_url": 'https://dogehype.com/public/icon.png'}
         )
-        from_email = settings.DEFAULT_FROM_EMAIL
-        send_mail(subject, message, from_email, recipient_list)
+        email = EmailMessage(subject=subject,
+                             body=html_message,
+                             from_email=settings.DEFAULT_FROM_EMAIL,
+                             to=recipient_list)
+        email.content_subtype = 'html'
+        email.send()
 
 
 class UserConfirmEmailView(View):
