@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
+    PasswordResetCompleteView
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404, redirect
@@ -96,3 +97,26 @@ class EmailConfirmedView(TemplateView):
 class EmailConfirmationFailedView(TemplateView):
     template_name = 'users/email_confirmation_failed.html'
     extra_context = {'title': 'Invalid link'}
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """Класс для старта сброса пароля"""
+    template_name = 'users/password_reset_form.html'
+    email_template_name = 'users/password_reset_email.html'
+    html_email_template_name = email_template_name
+    success_url = reverse_lazy('users:password_reset_done')
+    extra_email_context = {"image_url": 'https://dogehype.com/public/icon.png'}
+    subject_template_name = 'users/password_reset_subject.txt'
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'users/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'users/password_reset_confirm.html'
+    success_url = reverse_lazy('users:password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'users/password_reset_complete.html'
