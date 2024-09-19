@@ -26,8 +26,118 @@
             your viewer and follower counts with our reliable, audience-focused strategy.
         </p>
     </div>
-
-
 </div>
+
+<div class="order-block">
+    <a href="#service-list" id="order-quick"
+       class="inline-flex justify-center  items-center py-3 px-4 text-center">
+        Quick Order
+        <svg class="" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                  clip-rule="evenodd"></path>
+        </svg>
+    </a>
+    <a href="/login" id="order-dashboard"
+       class="inline-flex ml-5 rounded-md justify-center items-center text-center py-3 px-4 text-base font-medium text-center text-white-900  border border-gray-300">
+        Dashboard
+        <svg class="" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+             fill="none" viewBox="0 0 18 15">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M1 7.5h11m0 0L8 3.786M12 7.5l-4 3.714M12 1h3c.53 0 1.04.196 1.414.544.375.348.586.82.586 1.313v9.286c0 .492-.21.965-.586 1.313A2.081 2.081 0 0 1 15 14h-3"></path>
+        </svg>
+    </a>
+    <a href="https://trustpilot.com/review/dogehype.biz" target="_blank">
+        <p class="text-yellow-500 mt-4">See our reviews on 💚 Trustpilot</p>
+    </a>
+</div>
+
+<div class="main-category">
+    <div class="categories">
+        <form id="category-form" method="get" action="#">
+            <ul>
+                {% for category in categories %}
+                <li class="category-item">
+                    <input type="radio" id="category{{ category.id }}" name="category" value="{{ category.id }}"
+                           {% if category.id|stringformat:"s" == selected_category_id %}checked{% endif %}>
+                    <label for="category{{ category.id }}">
+                        <span class="indicator"></span>
+                        <span class="category-text">{{ category.name }}</span>
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+        </form>
+    </div>
+</div>
+
+
+<div class="service-container">
+    <div class="service-list" id="service-list">
+        {% for service in services %}
+        <div class="service-cart">
+            <div class="service-info">
+                <div class="service-category">
+                    <p>{{ service.category|upper }}</p>
+                    <button class="">Buy Now</button>
+                </div>
+                <div class="service-name">
+                    <h1>
+                        {{ service.name }}
+                    </h1>
+                </div>
+            </div>
+            <div class="service-ul">
+                <ul>
+                    {% for detail in service.details.all %}
+                    <li class="service-li">
+                        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img"
+                             width="26" height="26" viewBox="0 0 26 26">
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="2" d="m6 12l4.243 4.243l8.484-8.486"></path>
+                        </svg>
+                        <span>{{ detail.detail }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- service/index.html -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryForm = document.getElementById('category-form');
+        const serviceListContainer = document.querySelector('.service-container');
+
+        categoryForm.addEventListener('change', function(event) {
+            const selectedCategoryId = event.target.value;
+
+            if (selectedCategoryId) {
+                fetch(`/load_services/?category=${selectedCategoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelector('.service-list').innerHTML = data.html;
+                    })
+                    .catch(error => console.error('Ошибка при загрузке товаров:', error));
+            }
+        });
+
+        // Инициируем загрузку услуг при первой загрузке страницы
+        const initialCategoryId = categoryForm.querySelector('input[name="category"]:checked')?.value;
+        if (initialCategoryId) {
+            fetch(`/load_services/?category=${initialCategoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.querySelector('.service-list').innerHTML = data.html;
+                })
+                .catch(error => console.error('Ошибка при загрузке товаров:', error));
+        }
+    });
+</script>
 
 {% endblock %}
