@@ -57,8 +57,12 @@ header {
 
 /* ----------------------------Стили для блока маин ----------------------*/
 main {
+<<<<<<< HEAD
     width: 100%;
-    padding: 30px; 
+    padding: 30px;
+=======
+    padding: 30px;
+>>>>>>> eefeca901aae9c6749d7b6f3c19e28ae8fe66ad2
     display: flex;
     flex-direction: column;
     flex: 1 0 auto;

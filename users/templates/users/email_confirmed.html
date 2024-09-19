@@ -1,0 +1,6 @@
+{% extends 'login.html' %}
+
+{% block content_users %}
+<h1 style="font-size: 15px">Поздравляем! <br>Ваш профиль активирован.</h1>
+<a href="{% url 'users:login' %}"><button type="submit" class="login-btn" >Войти</button></a>
+{% endblock %}

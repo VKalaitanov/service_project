@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djmoney',
     'service.apps.ServiceConfig',
     'users.apps.UsersConfig',
 ]
@@ -49,6 +50,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'templates',
+            BASE_DIR / 'users' / 'templates' / 'users',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -120,3 +122,19 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomerUser'
+
+
+AUTHENTICATION_BACKENDS = [
+    'users.authentication.EmailAuthBackend',
+]
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = "smtp.yandex.ru"
+EMAIL_PORT = 465
+EMAIL_HOST_USER = "adamcik08@yandex.ru"
+EMAIL_HOST_PASSWORD = "vqnikdosuwpjcsut"
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+EMAIL_ADMIN = EMAIL_HOST_USER
