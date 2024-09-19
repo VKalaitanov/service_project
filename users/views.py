@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
     PasswordResetCompleteView
 from django.contrib.sites.shortcuts import get_current_site
@@ -10,7 +11,7 @@ from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views import View
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, UpdateView
 
 from .forms import LoginUserForm, RegisterUserForm
 from .utils import account_activation_token
@@ -22,7 +23,7 @@ class LoginUser(LoginView):
     extra_context = {'title': 'Login'}
 
     def get_success_url(self):
-        return reverse_lazy('home')
+        return reverse_lazy('users:profile')
 
 
 class RegisterUser(CreateView):
@@ -120,3 +121,19 @@ class CustomPasswordResetConfirmView(PasswordResetConfirmView):
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'users/password_reset_complete.html'
+
+
+class ProfileUser(LoginRequiredMixin, TemplateView):
+    model = get_user_model()
+    template_name = 'users/profile.html'
+    extra_context = {
+        'title': "Profile user",
+        'balance': 0.0,
+    }
+
+    def get_success_url(self):
+        return reverse_lazy('users:profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
