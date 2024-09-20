@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Service, Category, ServiceDetail
+from .models import Service, Category, ServiceDetail, Tag
+
 
 class ServiceDetailInline(admin.TabularInline):
     model = ServiceDetail
@@ -24,3 +25,5 @@ class ServiceAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug']
     prepopulated_fields = {'slug': ('name',)}
+
+admin.site.register(Tag)

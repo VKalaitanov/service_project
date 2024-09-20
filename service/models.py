@@ -21,6 +21,8 @@ class Service(models.Model):
         'Category', on_delete=models.PROTECT, related_name='service', verbose_name="Категории"
     )
 
+    tags = models.ManyToManyField('Tag', related_name='services')
+
     objects = models.Manager()
 
     class Meta:
@@ -50,6 +52,11 @@ class Category(models.Model):
     # def get_absolute_url(self):
     #     return reverse('service:category', kwargs={'category_slug': self.slug})
 
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
 
 class ServiceDetail(models.Model):
     service = models.ForeignKey(Service, related_name='details', on_delete=models.CASCADE)

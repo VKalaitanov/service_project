@@ -53,6 +53,10 @@
 </div>
 
 <div class="main-category">
+    <div class="main-info-block">
+        <h4>Choose your platform</h4>
+        <span class="text-muted">Choose which platform you will be using your new package on</span>
+    </div>
     <div class="categories">
         <form id="category-form" method="get" action="#">
             <ul>
@@ -71,6 +75,29 @@
     </div>
 </div>
 
+<div class="main-tag">
+    <div class="main-info-block">
+        <span class="text-muted">Filters</span>
+    </div>
+    <div class="tags">
+        <form id="tags-form" method="get" action="#">
+            <ul>
+                {% for tag in tags %}
+                <li class="category-item"> <!-- Используем тот же класс, что и для категорий -->
+                    <input type="radio" id="tag{{ tag.id }}" name="tag" value="{{ tag.id }}"
+                           {% if tag.id|stringformat:"s" == selected_tag_id %}checked{% endif %}>
+                    <label for="tag{{ tag.id }}">
+                        <span class="indicator"></span>
+                        <span class="category-text">{{ tag.name }}</span> <!-- Используем тот же класс category-text -->
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+        </form>
+    </div>
+</div>
+
+
 
 <div class="service-container">
     <div class="service-list" id="service-list">
@@ -79,7 +106,7 @@
             <div class="service-info">
                 <div class="service-category">
                     <p>{{ service.category|upper }}</p>
-                    <button class="">Buy Now</button>
+                    <button class="buy-now-btn" data-service-id="{{ service.id }}">Buy Now</button>
                 </div>
                 <div class="service-name">
                     <h1>
@@ -102,42 +129,69 @@
                 </ul>
             </div>
 
+            <!-- Скрытая форма -->
+            <div class="service-form hidden" id="service-form-{{ service.id }}">
+                <form>
+                    <!-- Ваша форма с полями -->
+                    <label for="username-{{ service.id }}">Twitch Username</label>
+                    <input type="text" id="username-{{ service.id }}" name="username" placeholder="riotgames">
+
+                    <label for="viewer-count-{{ service.id }}">Enter viewer count</label>
+                    <input type="number" id="viewer-count-{{ service.id }}" name="viewer_count" placeholder="5">
+
+                    <button type="submit">Submit</button>
+                    <!-- Кнопка для закрытия формы -->
+                    <button type="button" class="close-form-btn" data-service-id="{{ service.id }}">✕</button>
+                </form>
+            </div>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- service/index.html -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const categoryForm = document.getElementById('category-form');
+        const tagForm = document.getElementById('tags-form');
         const serviceListContainer = document.querySelector('.service-container');
 
-        categoryForm.addEventListener('change', function(event) {
-            const selectedCategoryId = event.target.value;
+        function loadServices(categoryId, tagId) {
+            let url = '/load_services/?';
+            if (categoryId) url += `category=${categoryId}&`;
+            if (tagId) url += `tag=${tagId}`;
 
-            if (selectedCategoryId) {
-                fetch(`/load_services/?category=${selectedCategoryId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.querySelector('.service-list').innerHTML = data.html;
-                    })
-                    .catch(error => console.error('Ошибка при загрузке товаров:', error));
-            }
-        });
-
-        // Инициируем загрузку услуг при первой загрузке страницы
-        const initialCategoryId = categoryForm.querySelector('input[name="category"]:checked')?.value;
-        if (initialCategoryId) {
-            fetch(`/load_services/?category=${initialCategoryId}`)
+            fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     document.querySelector('.service-list').innerHTML = data.html;
                 })
-                .catch(error => console.error('Ошибка при загрузке товаров:', error));
+                .catch(error => console.error('Ошибка при загрузке услуг:', error));
         }
+
+        // Обработка выбора категории
+        categoryForm.addEventListener('change', function(event) {
+            const selectedCategoryId = event.target.value;
+            const selectedTagId = tagForm.querySelector('input[name="tag"]:checked')?.value;
+
+            loadServices(selectedCategoryId, selectedTagId);
+        });
+
+        // Обработка выбора тега
+        tagForm.addEventListener('change', function(event) {
+            const selectedTagId = event.target.value;
+            const selectedCategoryId = categoryForm.querySelector('input[name="category"]:checked')?.value;
+
+            loadServices(selectedCategoryId, selectedTagId);
+        });
+
+        // Инициируем загрузку услуг при первой загрузке страницы
+        const initialCategoryId = categoryForm.querySelector('input[name="category"]:checked')?.value;
+        const initialTagId = tagForm.querySelector('input[name="tag"]:checked')?.value;
+        loadServices(initialCategoryId, initialTagId);
     });
+
 </script>
+
 
 {% endblock %}
