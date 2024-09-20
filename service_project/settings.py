@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'djmoney',
     'service.apps.ServiceConfig',
     'users.apps.UsersConfig',
+    'orders.apps.OrdersConfig',
 ]
 
 MIDDLEWARE = [

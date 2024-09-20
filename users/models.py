@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 from djmoney.models.fields import MoneyField
 
+
 class CustomerUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -29,13 +30,12 @@ class CustomerUserManager(BaseUserManager):
 class CustomerUser(AbstractUser):
     username = models.CharField(blank=True, max_length=20)
     email = models.EmailField(unique=True)
-    balance = MoneyField(
-        decimal_places=2,
-        default=0,
-        default_currency='USD',
-        max_digits=11,
-    )
+    balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.email
 
     objects = CustomerUserManager()
