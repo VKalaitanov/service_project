@@ -1,9 +1,102 @@
-{% extends 'login.html' %}
+{% load static %}
 
-{% block content_users %}
-<h1>Письмо отправлено!</h1>
-<h1 style="font-size: 15px">Мы отправили вам инструкцию по активации новой учетной записи на указанный адрес электронной почты (если в нашей базе данных есть такой адрес). Вы должны получить ее в ближайшее время.</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{ title }}</title>
+    <link type="text/css" href="{% static 'users/css/styles_sent_email.css' %}" rel="stylesheet" />
+    <style>
+        #resend-button {
+            display: none; /* Кнопка скрыта по умолчанию */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">
+                <img src="/media/mail-icon.png" alt="Mail Icon">
+            </div>
+            <h1>Check your mail</h1>
+            <p>A verification link has been sent to your email address: <strong>{{ user_email }}</strong></p>
+            <p id="timer-text">Didn't receive Email? Resend again in <span id="timer">30</span> seconds.</p>
+            <button id="resend-button" onclick="resendEmail()" class="login-btn">Resend Email</button>
+        </div>
+    </div>
+    <script>
+        // Устанавливаем начальное время
+        let timeLeft = 30; // Таймер на 30 секунд
+        const timerElement = document.getElementById("timer");
+        const resendButton = document.getElementById("resend-button");
+        const timerText = document.getElementById("timer-text");
+        let countdown;
 
-<h1 style="font-size: 15px">Если вы не получили письмо, пожалуйста, убедитесь, что вы ввели адрес с которым Вы зарегистрировались, и проверьте папку со спамом.</h1>
-<a href="{% url 'users:login' %}"><button type="submit" class="login-btn" >Войти</button></a>
-{% endblock %}
+        // Функция для запуска таймера
+        function startCountdown() {
+            timeLeft = 30; // Сброс времени
+            timerText.style.display = "block"; // Показываем текст таймера
+            resendButton.style.display = "none"; // Скрываем кнопку
+            timerElement.textContent = timeLeft; // Устанавливаем начальное значение
+
+            countdown = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown); // Останавливаем таймер
+                    resendButton.style.display = "block"; // Показываем кнопку
+                    timerText.style.display = "none"; // Скрываем только счетчик
+                }
+            }, 1000);
+        }
+
+        // Запускаем таймер при загрузке страницы
+        startCountdown();
+
+        // Функция для получения CSRF-токена из cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Функция для повторной отправки письма
+        function resendEmail() {
+            const csrftoken = getCookie('csrftoken');  // Получаем CSRF токен
+
+            fetch("{% url 'users:resend_verification_email' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})  // Можно передавать необходимые данные в теле запроса
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);  // Показываем сообщение об успехе
+                    startCountdown();  // Перезапускаем таймер
+                } else if (data.error) {
+                    alert(data.error);  // Показываем сообщение об ошибке
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

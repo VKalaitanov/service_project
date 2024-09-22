@@ -5,6 +5,7 @@ from djmoney.models.fields import MoneyField
 
 
 class CustomerUserManager(BaseUserManager):
+    """Менеджер по созданию суперпользователя"""
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
@@ -28,6 +29,7 @@ class CustomerUserManager(BaseUserManager):
 
 
 class CustomerUser(AbstractUser):
+    """Кастомная сущность пользователя"""
     username = models.CharField(blank=True, max_length=20)
     email = models.EmailField(unique=True)
     balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)

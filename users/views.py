@@ -1,20 +1,42 @@
-from django.conf import settings
+from urllib.request import Request
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
     PasswordResetCompleteView
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMessage
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_decode
 from django.views import View
-from django.views.generic import CreateView, TemplateView, UpdateView
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import CreateView, TemplateView
 
 from .forms import LoginUserForm, RegisterUserForm
-from .utils import account_activation_token
+from .utils import account_activation_token, send_verification_email
+
+
+@csrf_exempt
+def resend_verification_email(request):
+    if request.method == "POST":
+        user_email = request.session.get('user_email')
+
+        if not user_email:
+            return JsonResponse({'error': 'No email in session'}, status=400)
+
+        try:
+            user = get_user_model().objects.get(email=user_email)
+        except get_user_model().DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        if not user.is_active:
+            # Отправляем email для неактивного пользователя
+            send_verification_email(request, user)
+            return JsonResponse({'message': 'Verification email resent successfully!'})
+
+        return JsonResponse({'error': 'Account is already active.'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
 class LoginUser(LoginView):
@@ -34,37 +56,12 @@ class RegisterUser(CreateView):
 
     def form_valid(self, form):
         user = form.save(commit=False)
-        user.is_active = False  # Пользователь неактивен до подтверждения email
+        user.is_active = False
         user.save()
 
-        current_site = get_current_site(self.request).domain
-        token = account_activation_token.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-
-        activation_url = reverse_lazy(
-            'users:confirm_email',
-            kwargs={'uidb64': uid, 'token': token}
-        )
-        self.send_message_by_email(current_site=current_site,
-                                   activation_url=activation_url,
-                                   user=user)
+        self.request.session['user_email'] = user.email
+        send_verification_email(self.request, user)
         return super().form_valid(form)
-
-    def send_message_by_email(self, current_site, activation_url, user):
-        subject = "Verify your account - Dogehype"  # Тема письма
-        recipient_list = [user.email]  # список получателей
-
-        html_message = render_to_string(
-            'email_template.html',
-            context={"activate_url": f'http://{current_site}{activation_url}',
-                     "image_url": 'https://dogehype.com/public/icon.png'}
-        )
-        email = EmailMessage(subject=subject,
-                             body=html_message,
-                             from_email=settings.DEFAULT_FROM_EMAIL,
-                             to=recipient_list)
-        email.content_subtype = 'html'
-        email.send()
 
 
 class UserConfirmEmailView(View):
@@ -88,6 +85,13 @@ class UserConfirmEmailView(View):
 class EmailConfirmationSentView(TemplateView):
     template_name = 'users/email_confirmation_sent.html'
     extra_context = {'title': 'Activation email sent'}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Получаем email из сессии
+        user_email = self.request.session.get('user_email')
+        context['user_email'] = user_email
+        return context
 
 
 class EmailConfirmedView(TemplateView):
@@ -136,4 +140,3 @@ class ProfileUser(LoginRequiredMixin, TemplateView):
 
     def get_object(self, queryset=None):
         return self.request.user
-

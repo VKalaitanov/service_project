@@ -16,6 +16,7 @@ urlpatterns = [
     path('email-confirmation-sent/', views.EmailConfirmationSentView.as_view(), name='email_confirmation_sent'),
     path('email-confirmed/', views.EmailConfirmedView.as_view(), name='email_confirmed'),
     path('confirm-email-failed/', views.EmailConfirmationFailedView.as_view(), name='email_confirmation_failed'),
+    path('resend-verification-email/', views.resend_verification_email, name='resend_verification_email'),
 
     # ------- Восстановление пароля ------- #
     path('password-reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),
