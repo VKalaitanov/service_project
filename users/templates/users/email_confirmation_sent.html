@@ -8,6 +8,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{ title }}</title>
     <link type="text/css" href="{% static 'users/css/styles_sent_email.css' %}" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <style>
         #resend-button {
             display: none; /* Кнопка скрыта по умолчанию */
@@ -27,76 +29,84 @@
         </div>
     </div>
     <script>
-        // Устанавливаем начальное время
-        let timeLeft = 30; // Таймер на 30 секунд
-        const timerElement = document.getElementById("timer");
-        const resendButton = document.getElementById("resend-button");
-        const timerText = document.getElementById("timer-text");
-        let countdown;
+        // Инициализация глобальных переменных
+let countdown;  // Глобальная переменная для хранения ID таймера
+let timeLeft = 30;  // Таймер на 30 секунд
+const timerElement = document.getElementById("timer");
+const resendButton = document.getElementById("resend-button");
+const timerText = document.getElementById("timer-text");
 
-        // Функция для запуска таймера
-        function startCountdown() {
-            timeLeft = 30; // Сброс времени
-            timerText.style.display = "block"; // Показываем текст таймера
-            resendButton.style.display = "none"; // Скрываем кнопку
-            timerElement.textContent = timeLeft; // Устанавливаем начальное значение
+// Функция для запуска таймера
+function startCountdown() {
+    timeLeft = 30;  // Сброс времени до 30 секунд
+    timerElement.textContent = timeLeft;  // Отображаем начальное время
+    timerText.style.display = "block";  // Показываем текст с таймером
+    resendButton.style.display = "none";  // Скрываем кнопку повторной отправки
 
-            countdown = setInterval(() => {
-                timeLeft--;
-                timerElement.textContent = timeLeft;
+    // Если таймер уже был запущен, очищаем его перед запуском нового
+    if (countdown) {
+        clearInterval(countdown);
+    }
 
-                if (timeLeft <= 0) {
-                    clearInterval(countdown); // Останавливаем таймер
-                    resendButton.style.display = "block"; // Показываем кнопку
-                    timerText.style.display = "none"; // Скрываем только счетчик
-                }
-            }, 1000);
+    // Запускаем новый таймер
+    countdown = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft;  // Обновляем отображение таймера
+
+        // Когда время истекает, останавливаем таймер и показываем кнопку
+        if (timeLeft <= 0) {
+            clearInterval(countdown);  // Останавливаем таймер
+            resendButton.style.display = "block";  // Показываем кнопку повторной отправки
+            timerText.style.display = "none";  // Скрываем текст с таймером
         }
+    }, 1000);  // Таймер обновляется каждую секунду
+}
 
-        // Запускаем таймер при загрузке страницы
-        startCountdown();
-
-        // Функция для получения CSRF-токена из cookies
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
+// Функция для получения CSRF-токена из cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
-            return cookieValue;
         }
+    }
+    return cookieValue;
+}
 
-        // Функция для повторной отправки письма
-        function resendEmail() {
-            const csrftoken = getCookie('csrftoken');  // Получаем CSRF токен
+// Функция для повторной отправки письма с AJAX запросом
+function resendEmail() {
+    const csrftoken = getCookie('csrftoken');  // Получаем CSRF токен
+    console.log("CSRF Token: ", csrftoken);    // Проверяем, что CSRF токен не пустой
 
-            fetch("{% url 'users:resend_verification_email' %}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({})  // Можно передавать необходимые данные в теле запроса
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);  // Показываем сообщение об успехе
-                    startCountdown();  // Перезапускаем таймер
-                } else if (data.error) {
-                    alert(data.error);  // Показываем сообщение об ошибке
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+    fetch("{% url 'users:resend_verification_email' %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})  // Можно передавать необходимые данные в теле запроса
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            console.log(data.message);  // Сообщение об успехе
+            startCountdown();  // Перезапуск таймера после успешной отправки
+        } else if (data.error) {
+            console.error(data.error);  // Сообщение об ошибке
         }
+    })
+    .catch(error => {
+        console.error('Ошибка запроса:', error);  // Логируем ошибки в консоль
+    });
+}
+
+// Запуск таймера при загрузке страницы
+startCountdown();
     </script>
 </body>
 </html>
