@@ -1,4 +1,5 @@
 from django.db import models
+from djmoney.models.fields import MoneyField
 
 
 class Service(models.Model):
@@ -15,10 +16,14 @@ class ServiceOption(models.Model):
 
     name = models.CharField(max_length=255, verbose_name="Категория")  # Например, "Followers" или "Likes"
 
-    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Цена")
+    price_per_unit = MoneyField(max_digits=10, decimal_places=2,
+                                verbose_name='Цена', default=0,
+                                default_currency="USD")
+
     required_fields = models.JSONField(default=dict)  # Динамические поля для услуги
     has_period = models.BooleanField(default=False,
-                                     verbose_name="Добавить период")  # Указывает, нужно ли поле "period" для этой услуги
+                                     verbose_name="Добавить период", )
+    #  Указывает, нужно ли поле "period" для этой услуги
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

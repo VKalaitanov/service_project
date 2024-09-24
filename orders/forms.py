@@ -4,7 +4,6 @@ from django import forms
 class DynamicOrderForm(forms.Form):
     quantity = forms.IntegerField(label="Количество", min_value=1)
 
-    # Варианты выбора для периода
     PERIOD_CHOICES = [
         ('Hour', 'Hour'),
         ('Day', 'Day'),
@@ -19,6 +18,10 @@ class DynamicOrderForm(forms.Form):
         # Добавляем динамические поля из required_fields
         if service_option and service_option.required_fields:
             for field_name, label in service_option.required_fields.items():
+                if field_name == 'link':
+                    self.fields[field_name] = forms.URLField(label=label, required=True)
+                elif field_name == 'int':
+                    self.fields[field_name] = forms.IntegerField(label=label, required=True)
                 self.fields[field_name] = forms.CharField(label=label, required=True)
 
         # Если услуга требует поле "period", добавляем его как выбор
@@ -28,3 +31,12 @@ class DynamicOrderForm(forms.Form):
                 required=False,
                 choices=self.PERIOD_CHOICES
             )
+
+        # Определяем порядок полей: динамические поля -> period -> quantity
+        field_order = list(self.fields.keys() - ['period', 'quantity'])  # Все динамические поля
+        if 'period' in self.fields:
+            field_order.append('period')  # Добавляем period перед quantity, если поле есть
+        field_order.append('quantity')  # Добавляем quantity в конец
+
+        # Применяем порядок
+        self.order_fields(field_order)
