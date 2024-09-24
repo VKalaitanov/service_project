@@ -1,5 +1,3 @@
-from urllib.request import Request
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
@@ -14,7 +12,10 @@ from django.views.generic import CreateView, TemplateView
 
 from .forms import LoginUserForm, RegisterUserForm
 from .utils import account_activation_token, send_verification_email
-
+from orders.forms import DynamicOrderForm
+from orders.models import Order
+from service.models import Service
+from .service import ControlBalance
 
 @csrf_exempt
 def resend_verification_email(request):
@@ -127,13 +128,62 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'users/password_reset_complete.html'
 
 
-class ProfileUser(LoginRequiredMixin, TemplateView):
+class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
     model = get_user_model()
     template_name = 'users/profile.html'
     extra_context = {
         'title': "Profile user",
-        'balance': 0.0,
     }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        services = Service.objects.all().prefetch_related('options')  # Получаем все доступные сервисы
+        forms = []
+
+        for service in services:
+            service_options = service.options.all()
+            for service_option in service_options:
+                form = DynamicOrderForm(service_option=service_option)
+                forms.append((service, service_option, form))
+
+        orders = Order.objects.filter(user=self.request.user)
+
+        context['forms'] = forms
+        context['services'] = services
+        context['orders'] = orders
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        services = Service.objects.all()
+        forms = []
+
+        if request.method == 'POST':
+            for service in services:
+                service_options = service.options.all()
+                for service_option in service_options:
+                    form = DynamicOrderForm(request.POST, service_option=service_option)
+                    forms.append((service, service_option, form))
+
+                    if form.is_valid():
+                        custom_data = {}
+                        for field_name in service_option.required_fields.keys():
+                            custom_data[field_name] = form.cleaned_data[field_name]
+
+                        period = form.cleaned_data.get('period') if service_option.has_period else None
+                        self.place_an_order(
+                            request=request, service=service,
+                            service_option=service_option, custom_data=custom_data,
+                            quantity=form.cleaned_data['quantity'], period=period
+                        )
+
+            # После успешного создания всех заказов перенаправляем пользователя
+            return redirect(self.get_success_url())
+
+        # Если форма не валидна или это не POST-запрос, рендерим страницу заново
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def get_success_url(self):
         return reverse_lazy('users:profile')

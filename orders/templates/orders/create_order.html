@@ -1,8 +1,0 @@
-<form method="post">
-    {% csrf_token %}
-    <h2>Заказ услуги {{ service_option.name }} для {{ service_option.service.name }}</h2>
-
-    {{ form.as_p }}  <!-- Это выводит все поля формы в виде абзацев -->
-
-    <button type="submit">Оформить заказ</button>
-</form>
