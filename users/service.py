@@ -19,13 +19,3 @@ class ControlBalance:
             status='pending',
             period=period
         )
-    # Order.objects.create(
-    #     user=request.user,
-    #     service=service,
-    #     service_option=service_option,
-    #     custom_data=custom_data,
-    #     quantity=form.cleaned_data['quantity'],
-    #     total_price=service_option.price_per_unit * form.cleaned_data['quantity'],
-    #     status='pending',
-    #     period=period
-    # )
