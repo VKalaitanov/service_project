@@ -76,6 +76,7 @@
                     <th>Category</th>
                     <th>Quantity</th>
                     <th>Total Price</th>
+                    <th>Period</th>
                     <th>Status</th>
                     <th>Start time</th>
                 </tr>
@@ -87,6 +88,7 @@
                     <td>{{ order.service_option.name }}</td>
                     <td>{{ order.quantity }}</td>
                     <td>{{ order.total_price }}</td>
+                    <td>{% if order.period %} {{ order.period }} {% else %} - {% endif %}</td>
                     <td>{{ order.status }}</td>
                     <td>{{ order.created_at }}</td>
                 </tr>

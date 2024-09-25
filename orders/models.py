@@ -19,7 +19,7 @@ class Order(models.Model):
 
     service_option = models.ForeignKey(ServiceOption, on_delete=models.CASCADE, verbose_name='Опции')
 
-    user = models.ForeignKey(CustomerUser, on_delete=models.CASCADE, verbose_name='Пользователь')  # Заказчик
+    user = models.ForeignKey(CustomerUser, related_name="orders", on_delete=models.CASCADE, verbose_name='Пользователь')  # Заказчик
 
     custom_data = models.JSONField(
         verbose_name='Поля')  # Динамическое поле для хранения данных (username, ссылка и т.д.)
@@ -45,3 +45,7 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} for {self.user.username}"
+
+    class Meta:
+        verbose_name = "Заказ"
+        verbose_name_plural = "Заказы"
