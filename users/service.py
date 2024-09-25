@@ -7,8 +7,8 @@ class ControlBalance:
     def place_an_order(self, request, service, service_option, custom_data, quantity, period):
         user = get_user_model().objects.get(email=request.user)
         total_price = service_option.price_per_unit * quantity
-        if user.balance < total_price:
-            return None
+        # if user.balance < total_price:
+        #     return None
         Order.objects.create(
             user=request.user,
             service=service,

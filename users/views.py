@@ -13,9 +13,9 @@ from django.views.generic import CreateView, TemplateView
 from .forms import LoginUserForm, RegisterUserForm
 from .utils import account_activation_token, send_verification_email
 from orders.forms import DynamicOrderForm
-from orders.models import Order
-from service.models import Service
+from orders.models import Order, Service
 from .service import ControlBalance
+
 
 @csrf_exempt
 def resend_verification_email(request):
