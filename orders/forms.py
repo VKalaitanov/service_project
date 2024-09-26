@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 
 class DynamicOrderForm(forms.Form):
@@ -12,20 +13,17 @@ class DynamicOrderForm(forms.Form):
     ]
 
     def __init__(self, *args, **kwargs):
-        service_option = kwargs.pop('service_option', None)
+        self.service_option = kwargs.pop('service_option', None)
+        self.user = kwargs.pop('user', None)
         super(DynamicOrderForm, self).__init__(*args, **kwargs)
 
         # Добавляем динамические поля из required_fields
-        if service_option and service_option.required_fields:
-            for field_name, label in service_option.required_fields.items():
-                if field_name == 'link':
-                    self.fields[field_name] = forms.URLField(label=label, required=True)
-                elif field_name == 'int':
-                    self.fields[field_name] = forms.IntegerField(label=label, required=True)
+        if self.service_option and self.service_option.required_fields:
+            for field_name, label in self.service_option.required_fields.items():
                 self.fields[field_name] = forms.CharField(label=label, required=True)
 
         # Если услуга требует поле "period", добавляем его как выбор
-        if service_option and service_option.has_period:
+        if self.service_option and self.service_option.has_period:
             self.fields['period'] = forms.ChoiceField(
                 label="Период",
                 required=False,
@@ -40,3 +38,10 @@ class DynamicOrderForm(forms.Form):
 
         # Применяем порядок
         self.order_fields(field_order)
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data['quantity']
+        total_price = self.service_option.price_per_unit * quantity
+        if self.user.balance < total_price:
+            raise ValidationError("У вас недостаточно средств")
+        return quantity

@@ -147,7 +147,7 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
                 form = DynamicOrderForm(service_option=service_option)
                 forms.append((service, service_option, form))
 
-        orders = Order.objects.filter(user=self.request.user)
+        orders = Order.objects.filter(user=self.request.user).select_related('service_option', 'service')
 
         context['forms'] = forms
         context['services'] = services
@@ -160,10 +160,11 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
         forms = []
 
         if request.method == 'POST':
+            user = get_user_model().objects.get(email=self.request.user)
             for service in services:
                 service_options = service.options.all()
                 for service_option in service_options:
-                    form = DynamicOrderForm(request.POST, service_option=service_option)
+                    form = DynamicOrderForm(request.POST, service_option=service_option, user=user)
                     forms.append((service, service_option, form))
 
                     if form.is_valid():
@@ -172,12 +173,12 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
                             custom_data[field_name] = form.cleaned_data[field_name]
 
                         period = form.cleaned_data.get('period') if service_option.has_period else None
+
                         self.place_an_order(
-                            request=request, service=service,
+                            user=user, service=service,
                             service_option=service_option, custom_data=custom_data,
                             quantity=form.cleaned_data['quantity'], period=period
                         )
-
             # После успешного создания всех заказов перенаправляем пользователя
             return redirect(self.get_success_url())
 
