@@ -1,16 +1,14 @@
-from django.contrib.auth import get_user_model
 from orders.models import Order
 
 
 class ControlBalance:
 
-    def place_an_order(self, request, service, service_option, custom_data, quantity, period):
-        user = get_user_model().objects.get(email=request.user)
+    def place_an_order(self, user, service, service_option, custom_data, quantity, period):
         total_price = service_option.price_per_unit * quantity
-        # if user.balance < total_price:
-        #     return None
+        user.balance -= total_price
+        user.save()
         Order.objects.create(
-            user=request.user,
+            user=user,
             service=service,
             service_option=service_option,
             custom_data=custom_data,
