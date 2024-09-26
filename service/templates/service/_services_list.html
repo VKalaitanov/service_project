@@ -1,31 +1,31 @@
-
-
-<div class="service-list" id="service-list">
-    {% for service in services %}
-    <div class="service-cart">
-        <div class="service-info">
-            <div class="service-category">
-                <p>{{ service.category.name|upper }}</p>
-                <button class="">Buy Now</button>
-            </div>
-            <div class="service-name">
-                <h1>{{ service.name }}</h1>
-            </div>
+{% for service in services %}
+<div class="service-cart">
+    <div class="service-info">
+        <div class="service-category">
+            <p>{{ service.category|upper }}</p>
+            <a href="{% url 'users:profile' %}">
+                <button class="buy-now-btn" data-service-id="{{ service.id }}">Buy Now</button>
+            </a>
         </div>
-        <div class="service-ul">
-            <ul>
-                {% for detail in service.details.all %}
-                <li class="service-li">
-                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img"
-                         width="26" height="26" viewBox="0 0 26 26">
-                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                              stroke-width="2" d="m6 12l4.243 4.243l8.484-8.486"></path>
-                    </svg>
-                    <span>{{ detail.detail }}</span>
-                </li>
-                {% endfor %}
-            </ul>
+        <div class="service-name">
+            <h1>
+                {{ service.name }}
+            </h1>
         </div>
     </div>
-    {% endfor %}
+    <div class="service-ul">
+        <ul>
+            {% for detail in service.details.all %}
+            <li class="service-li">
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img"
+                     width="26" height="26" viewBox="0 0 26 26">
+                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="2" d="m6 12l4.243 4.243l8.484-8.486"></path>
+                </svg>
+                <span>{{ detail.detail }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
+{% endfor %}

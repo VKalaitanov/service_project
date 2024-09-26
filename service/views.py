@@ -31,7 +31,6 @@ class HomePage(ListView):
         context['selected_tag_id'] = self.request.GET.get('tag')  # Добавляем id выбранного тега
         return context
 
-
 def load_services(request):
     category_id = request.GET.get('category')
     tag_id = request.GET.get('tag')  # Получаем id тега

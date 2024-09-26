@@ -5,40 +5,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link type="text/css" href="{% static 'users/css/users_profile.css' %}" rel="stylesheet" />
+    <link type="text/css" href="{% static 'users/css/users_profile.css' %}" rel="stylesheet"/>
 </head>
 <body>
-    <header class="header-item">
-        <div class="profile-info">
-            <span class="profile-name">NEZHNA</span>
-            <span class="profile-email">Website ID: {{ user.email }}</span>
-            <span class="available-funds">Available Funds: {{ user.balance }}</span>
-            <button class="add-funds-btn">+ Add Funds</button>
-        </div>
-
-        <div class="logout">
-            <a href="{% url 'users:logout' %}"
-		   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log out</a>
-	<form id="logout-form" method="POST" style="display: none;" action="{% url 'users:logout' %}">
-    	{% csrf_token %}
-    	<button type="submit">Log out</button>
-    </form>
-        </div>
-    </header>
-
-    <main>
-        <section class="services">
-    <h2>Select Services</h2>
-    <div class="service-buttons">
-        {% for service, service_option, form in forms %}
-            <button class="service-btn" onclick="toggleForm('form-{{ service_option.id }}')">{{ service.name }} - {{ service_option.name }}</button>
-        {% endfor %}
+<header class="header-item">
+    <div class="profile-info">
+        <span class="profile-name">NEZHNA</span>
+        <span class="profile-email">Website ID: {{ user.email }}</span>
+        <span class="available-funds">Available Funds: {{ user.balance }}</span>
+        <button class="add-funds-btn">+ Add Funds</button>
     </div>
-</section>
 
-<!-- Формы для каждого сервиса -->
-<section class="service-forms">
-    {% for service, service_option, form in forms %}
+    <div class="logout">
+        <a href="{% url 'users:logout' %}"
+           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Log out</a>
+        <form id="logout-form" method="POST" style="display: none;" action="{% url 'users:logout' %}">
+            {% csrf_token %}
+            <button type="submit">Log out</button>
+        </form>
+    </div>
+</header>
+
+<main>
+    <section class="services">
+        <h2>Select Services</h2>
+        <div class="service-buttons">
+            {% for service, service_option, form in forms %}
+            <button class="service-btn" onclick="toggleForm('form-{{ service_option.id }}')">{{ service.name }} - {{
+                service_option.name }}
+            </button>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Формы для каждого сервиса -->
+    <section class="service-forms">
+        {% for service, service_option, form in forms %}
         <div id="form-{{ service_option.id }}" class="service-form" style="display:none;">
             <h3>{{ service.name }} - {{ service_option.name }}</h3>
             <form method="POST">
@@ -47,69 +49,69 @@
                 <button type="submit" class="btn btn-primary">Submit Order</button>
             </form>
         </div>
-    {% endfor %}
-</section>
+        {% endfor %}
+    </section>
 
-<script>
-    // Функция для переключения видимости формы
-    function toggleForm(formId) {
-        var forms = document.getElementsByClassName('service-form');
-        // Скрываем все формы
-        for (var i = 0; i < forms.length; i++) {
-            forms[i].style.display = 'none';
+    <script>
+        // Функция для переключения видимости формы
+        function toggleForm(formId) {
+            var forms = document.getElementsByClassName('service-form');
+            // Скрываем все формы
+            for (var i = 0; i < forms.length; i++) {
+                forms[i].style.display = 'none';
+            }
+            // Показываем только выбранную форму
+            var form = document.getElementById(formId);
+            if (form) {
+                form.style.display = 'block';
+            }
         }
-        // Показываем только выбранную форму
-        var form = document.getElementById(formId);
-        if (form) {
-            form.style.display = 'block';
-        }
-    }
-</script>
+    </script>
 
     <section class="user-orders">
         <h2>Your Orders</h2>
         {% if orders %}
         <table>
             <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Category</th>
-                    <th>Quantity</th>
-                    <th>Total Price</th>
-                    <th>Period</th>
-                    <th>Status</th>
-                    <th>Start time</th>
-                </tr>
+            <tr>
+                <th>Service</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Period</th>
+                <th>Status</th>
+                <th>Start time</th>
+            </tr>
             </thead>
             <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ order.service.name }}</td>
-                    <td>{{ order.service_option.name }}</td>
-                    <td>{{ order.quantity }}</td>
-                    <td>{{ order.total_price }}</td>
-                    <td>{% if order.period %} {{ order.period }} {% else %} - {% endif %}</td>
-                    <td>{{ order.status }}</td>
-                    <td>{{ order.created_at }}</td>
-                </tr>
-                {% endfor %}
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.service.name }}</td>
+                <td>{{ order.service_option.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.total_price }}</td>
+                <td>{% if order.period %} {{ order.period }} {% else %} - {% endif %}</td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.created_at }}</td>
+            </tr>
+            {% endfor %}
             </tbody>
         </table>
         {% else %}
         <table>
             <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Category</th>
-                    <th>Quantity</th>
-                    <th>Total Price</th>
-                    <th>Status</th>
-                    <th>Start time</th>
-                </tr>
+            <tr>
+                <th>Service</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Start time</th>
+            </tr>
             </thead>
-        {% endif %}
+            {% endif %}
     </section>
 
-    </main>
+</main>
 </body>
 </html>

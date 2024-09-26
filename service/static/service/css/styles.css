@@ -14,6 +14,8 @@ ul {
     list-style: none;
 }
 
+input {outline: none;}
+
 a {
     text-decoration: none;
     color: white;
@@ -54,16 +56,36 @@ header {
     font-size: 20px;
 }
 
+.header-info a {
+    margin-right: 20px;
+}
+
+.header-auth {
+    width: 120px;
+    height: 40px;
+    background-color: #4e4e4e;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 16px;
+    padding-top: 7px;
+    transition: all .3s ease;
+}
+
+.header-auth a {font-size: 17px;}
+
+.header-auth:hover {background-color: #3a3a3a;}
+
 
 /* ----------------------------Стили для блока маин ----------------------*/
 main {
     width: 100%;
-    padding: 30px;
     display: flex;
     flex-direction: column;
     flex: 1 0 auto;
-    background-color: rgb(20, 20, 23);
-    padding: 100px 50px;
+    /* background-color: rgb(20, 20, 23); */
+    background: rgb(0,0,0);
+    background: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(18,18,20,1) 53%, rgba(20,20,23,1) 100%);
+    padding: 100px 50px 50px 50px;
 }
 
 .main-info {
@@ -94,7 +116,7 @@ main {
 
 .order-block {margin: 30px 0 100px 0;}
 
-#order-quick, #order-dashboard {
+#order-quick, #order-dashboard, .looking-a1 {
     border-radius: 5px;
     background-color: rgb(239, 157, 14);
     width: 150px;
@@ -126,8 +148,9 @@ main {
     color: black;
 }
 
-#order-quick:hover {
+#order-quick:hover, .looking-a1:hover {
     background-color: rgb(255, 204, 0);
+    color: black;
 }
 
 #order-quick:hover svg {
@@ -152,21 +175,21 @@ label {
     justify-content: flex-start;
     align-items: center;
     cursor: pointer;
-    margin-right: 20px; 
+    margin-right: 20px;
 }
 
 .category-text {
-    margin-left: 8px; 
+    margin-left: 8px;
     font-size: 18px;
 
 }
 
 .indicator {
     display: inline-block;
-    width: 22px; 
+    width: 22px;
     height: 22px;
-    border: 2px solid #545454; 
-    background-color: transparent; 
+    border: 2px solid #545454;
+    background-color: transparent;
     position: relative;
     transition: background-color 0.3s, border-color 0.3s;
 }
@@ -175,20 +198,20 @@ input[type="radio"]:checked + label .indicator::before {
     content: "";
     display: block;
     position: absolute;
-    top: 4px; 
+    top: 4px;
     left: 4px;
-    width: 10px; 
+    width: 10px;
     height: 10px;
-    background-color: rgb(239, 157, 14); 
+    background-color: rgb(239, 157, 14);
 }
 
 input[type="radio"]:checked + label .indicator {
-    border-color: rgb(239, 157, 14); 
+    border-color: rgb(239, 157, 14);
 }
 
 ul {
     display: flex;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     padding: 0;
     list-style: none;
 }
@@ -197,7 +220,7 @@ ul {
 
 @media (max-width: 768px) {
     ul {
-        justify-content: flex-start; 
+        justify-content: flex-start;
     }
 }
 
@@ -217,12 +240,14 @@ ul {
 }
 
 .service-cart {
+    position: relative;
     min-width: 300px;
     width: 370px;
     min-height: 400px;
     height: 500px;
     border: 1px solid #646464;
     border-radius: 10px;
+    overflow: hidden;
 }
 
 .service-info {
@@ -272,7 +297,10 @@ ul {
     height: 30%;
     padding-left: 30px;
     font-size: 18px;
+    flex-wrap: wrap;
 }
+
+.service-ul ul {display: block;}
 
 .service-li span, .service-li svg {color: #646464;}
 
@@ -284,6 +312,82 @@ ul {
     white-space: pre-wrap;
 }
 
+.looking-container, .works-container, .footer-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    padding: 100px 50px;
+    margin: 70px 0;
+    width: 100%;
+    height: auto;
+    background-color: rgb(20, 20, 23);
+    overflow: hidden;
+}
+
+.looking-info, .looking-a {z-index: 10;}
+
+.looking-info h1 {
+    width: 45%;
+    font-weight: 700;
+    font-size: 50px;
+}
+
+.looking-info p {
+    font-size: 20px;
+    width: 45%;
+    line-height: 2;
+    margin: 50px 0;
+}
+
+.looking-a {
+    width: 100%;
+    height: fit-content;
+    margin-top: 30px;
+    align-self: center;
+
+}
+
+.looking-a1 {
+    padding: 15px;
+    font-weight: 700;
+    margin-right: 20px;
+}
+
+.looking-a2 span {margin-left: 5px;}
+
+.circle {
+    position: absolute;
+    width: 1000px;
+    height: 1000px;
+    background-color: rgba(255, 176, 30, 0.3);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    filter: blur(90px);
+    transform: translate(-50%);
+}
+
+.works-container {
+    padding-bottom: 65px;
+}
+
+.works-container h1 {
+    font-weight: 700;
+    font-size: 50px;
+    margin: 0;
+}
+
+.works-container hr {
+    margin: 35px 0;
+}
+
+.works-container p {
+    font-size: 18px;
+    margin-bottom: 35px;
+}
+
 /* ----------------------------Стили для футера-------------------------- */
 
 footer {
@@ -291,4 +395,37 @@ footer {
     flex: 0 0 auto;
     width: 100%;
     height: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 50px;
 }
+
+.footer-container {
+    margin: 0;
+    padding: 50px;
+}
+
+.footer-container hr {margin: 50px 0;}
+
+.footer-nav {
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+}
+
+.nav-links a {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.payment-block {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+}
+
+.payment-block p{margin: 0;}
+
+.payment-icons {margin-bottom: 20px;}

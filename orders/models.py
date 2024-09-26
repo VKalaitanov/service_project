@@ -1,6 +1,7 @@
-from users.models import CustomerUser
 from django.db import models
 from djmoney.models.fields import MoneyField
+
+from users.models import CustomerUser
 
 
 class Service(models.Model):
