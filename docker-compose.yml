@@ -45,12 +45,14 @@ services:
     image: postgres:alpine
     container_name: service_postgres
     restart: always
-    env_file:
-      - .env
+    environment:
+      POSTGRES_DB: service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
     volumes:
       - pgdata:/var/lib/postgresql/data/
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
