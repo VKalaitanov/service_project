@@ -1,17 +1,16 @@
-FROM python:3.10-alpine
+FROM python:3.9-alpine
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Устанавливаем обновления и необходимые модули
-RUN apk update && apk add --no-cache libpq gcc python3-dev musl-dev postgresql-dev
-
-# Обновление pip python
-RUN pip install --upgrade pip
+RUN apk update && \
+    apk add --no-cache libpq gcc python3-dev musl-dev postgresql-dev && \
+    pip install --upgrade pip
 
 # Установка пакетов для проекта
 COPY requirements.txt ./requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 WORKDIR /app
 
