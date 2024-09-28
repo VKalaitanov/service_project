@@ -31,14 +31,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djmoney',
-    'debug_toolbar',
+    # 'debug_toolbar',
     'service.apps.ServiceConfig',
     'users.apps.UsersConfig',
     'orders.apps.OrdersConfig',
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

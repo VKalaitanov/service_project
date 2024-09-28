@@ -8,7 +8,7 @@ urlpatterns = [
     path('', include('service.urls', namespace='service')),
     path('users/', include('users.urls', namespace='users')),
     path('order/', include('orders.urls', namespace='order')),
-    path("__debug__/", include("debug_toolbar.urls")),
+    # path("__debug__/", include("debug_toolbar.urls")),
 ]
 
 if settings.DEBUG:
