@@ -15,7 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(env('DEBUG', default=1))
+# DEBUG = int(env('DEBUG', default=1))
+DEBUG = False
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
 # ALLOWED_HOSTS = ['*']
