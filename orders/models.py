@@ -1,6 +1,5 @@
 from django.db import models
 from djmoney.models.fields import MoneyField
-
 from users.models import CustomerUser
 
 
@@ -58,13 +57,14 @@ class Order(models.Model):
     user = models.ForeignKey(CustomerUser, related_name="orders", on_delete=models.CASCADE,
                              verbose_name='Пользователь')  # Заказчик
 
-    custom_data = models.JSONField(
-        verbose_name='Поля')  # Динамическое поле для хранения данных (username, ссылка и т.д.)
+    custom_data = models.JSONField(  # Динамическое поле для хранения данных (username, ссылка и т.д.)
+        verbose_name='Поля, пример: {"username": "username"}')
 
-    quantity = models.IntegerField(verbose_name='Количество')  # Количество (лайков, подписчиков и т.д.)
+    quantity = models.IntegerField(
+        verbose_name='Количество')  # Количество (лайков, подписчиков и т.д.)
 
     total_price = MoneyField(max_digits=10, decimal_places=2,
-                             verbose_name='Цена', default=0,
+                             verbose_name='Общая сумма заказа', default=0,
                              default_currency="USD")
 
     status = models.CharField(max_length=50, choices=ChoicesStatus.choices, default=ChoicesStatus.PENDING,
@@ -77,11 +77,11 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     def calculate_total_price(self):
-        self.total_price = self.service_option.price_per_unit * self.quantity
+        self.total_price = self.service_option.price_per_unit * self.quantity  # type: ignore
         self.save()
 
     def __str__(self):
-        return f"Order {self.id} for {self.user.username}"
+        return str(self.user)
 
     class Meta:
         verbose_name = "Заказ"
@@ -89,10 +89,16 @@ class Order(models.Model):
 
 
 class ReplenishmentBalance(models.Model):
-    user = models.ForeignKey(CustomerUser, on_delete=models.CASCADE, related_name='replenishment')
-    balance_for_replenishment = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
+    class ChoicesStatus(models.Choices):
+        PENDING = 'pending'
+        COMPLETED = 'completed'
 
-    email = models.EmailField(max_length=255)
+    user = models.ForeignKey(CustomerUser, on_delete=models.CASCADE, related_name='replenishment')
+    balance_for_replenishment = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11,
+                                           verbose_name="Сумма пополнения")
+    email = models.EmailField(max_length=255, verbose_name="E-mail для связи")
+    status = models.CharField(max_length=50, choices=ChoicesStatus.choices, default=ChoicesStatus.PENDING,
+                              verbose_name="Статус заказа")
 
     def __str__(self):
         return f"User - {self.email}, balance - {self.balance_for_replenishment}"
@@ -100,4 +106,3 @@ class ReplenishmentBalance(models.Model):
     class Meta:
         verbose_name = 'Заказ на пополнение баланса'
         verbose_name_plural = 'Заказы на пополнение баланса'
-

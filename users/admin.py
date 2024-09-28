@@ -38,3 +38,6 @@ class AdminCustomerUser(admin.ModelAdmin):
             ]
             return mark_safe(", ".join(links))
         return "Нет заказов"
+
+    def has_add_permission(self, request):
+        return False
