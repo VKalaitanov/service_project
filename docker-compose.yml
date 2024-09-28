@@ -12,8 +12,12 @@ services:
     ports:
       - '8000:8000'
     container_name: service_django
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_DB=service_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
     volumes:
       - ./:/app
       - static:/app/static
@@ -43,8 +47,10 @@ services:
     image: postgres:alpine
     container_name: service_postgres
     restart: always
-    env_file:
-      - .env
+    environment:
+      POSTGRES_DB: service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
     volumes:
       - pgdata:/var/lib/postgresql/data/
     ports:
