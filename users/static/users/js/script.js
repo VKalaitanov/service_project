@@ -66,7 +66,7 @@ function resendEmail() {
             console.log(data.message);  // Сообщение об успехе
             startCountdown();  // Перезапуск таймера после успешной отправки
         } else if (data.error) {
-            console.error(data.error);  // Сообщение об ошибке
+            console.error('Ошибка:', data.error);  // Сообщение об ошибке
         }
     })
     .catch(error => {
