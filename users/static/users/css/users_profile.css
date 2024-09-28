@@ -1,6 +1,7 @@
 /* General Styles */
 body {
     margin: 0;
+    padding: 0 30px;
     font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.5;
@@ -32,13 +33,15 @@ header {
 
 .profile-info {
     display: flex;
-    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .profile-name {
     font-weight: bold;
     font-size: 20px;
-    margin-bottom: 5px;
+    margin-right: 10px;
 }
 
 .profile-email,
@@ -47,14 +50,16 @@ header {
     color: #ccc;
 }
 
+.user-balance {color: rgb(255, 238, 0);}
+
 .add-funds-btn {
     background-color: #007bff;
     color: #fff;
-    padding: 5px 10px;
+    padding: 3px 7px;
+    margin-left: 5px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 10px;
 }
 
 .add-funds-btn:hover {
@@ -65,6 +70,7 @@ header {
     color: #fff;
     font-size: 14px;
     text-decoration: none;
+    margin-left: 20px;
 }
 
 .logout a:hover {
@@ -88,11 +94,12 @@ main {
 
 .service-btn {
     background-color: #333;
+    font-size: 17px;
     color: #fff;
-    padding: 10px 20px;
+    padding: 5px 10px;
     border: none;
-    border-radius: 5px;
-    margin: 5px;
+    border-radius: 8px;
+    border: 1.5px solid rgb(23, 23, 28);
     cursor: pointer;
 }
 
@@ -101,6 +108,8 @@ main {
 }
 
 /* Table Styles */
+.user-orders {margin-top: 30px;}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -126,4 +135,41 @@ tbody td {
     text-align: center;
     padding: 20px;
     color: #888;
+}
+
+
+/* Стили для форм */
+.service-form {
+    width: 100%;
+    background-color: #1b1b1e;
+    border-radius: 8px;
+    border: 1.5px solid rgb(23, 23, 28);
+    padding: 30px 25px;
+}
+
+.service-form h3 {text-align: center;}
+
+.service-form form, .service-form form p {
+    display: flex;
+    flex-direction: column;
+}
+
+.service-form form input, .service-form form select {
+    height: 25px;
+    border: 1px solid rgb(23, 23, 28);
+    border-radius: 5px;
+    padding: 10px;
+    background-color: hsl(214.3, 12.3%, 13%);;
+    color: #888;
+}
+
+.service-form form button {
+    min-width: 50px;
+    width: 70px;
+    max-width: 150px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
