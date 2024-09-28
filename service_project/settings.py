@@ -87,11 +87,11 @@ WSGI_APPLICATION = 'service_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'service_db',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': '31.129.102.58',
-        'PORT': 5432,
+        'NAME': 'service_db',         # Имя вашей базы данных
+        'USER': 'postgres',           # Пользователь базы данных
+        'PASSWORD': '1234',           # Пароль пользователя
+        'HOST': '31.129.102.58',      # Хост, где запущен PostgreSQL
+        'PORT': '5432',               # Порт PostgreSQL
     }
 }
 # Password validation
