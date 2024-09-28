@@ -11,7 +11,7 @@ services:
       context: .
     ports:
       - '8000:8000'
-    container_name: django
+    container_name: service_django
     env_file:
       - .env
     volumes:
@@ -27,7 +27,7 @@ services:
                     gunicorn --workers=4 --reload --max-requests=1000 service_project.wsgi -b 0.0.0.0:8000"
 
   nginx:
-    container_name: nginx
+    container_name: service_nginx
     working_dir: /app
     image: nginx:stable-alpine
     restart: always
@@ -43,7 +43,7 @@ services:
 
   postgres:
     image: postgres:alpine
-    container_name: postgres
+    container_name: service_postgres
     restart: always
     environment:
       POSTGRES_DB: service_project
