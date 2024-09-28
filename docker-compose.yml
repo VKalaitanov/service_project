@@ -13,7 +13,7 @@ services:
       - '8000:8000'
     container_name: service_django
     environment:
-      - POSTGRES_DB=service_db
+      - POSTGRES_DB=service_db1
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
       - POSTGRES_HOST=postgres
@@ -48,7 +48,7 @@ services:
     container_name: service_postgres
     restart: always
     environment:
-      POSTGRES_DB: service_db
+      POSTGRES_DB: service_db1
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     volumes:
