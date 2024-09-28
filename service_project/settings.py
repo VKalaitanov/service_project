@@ -19,7 +19,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = 0
 
 ALLOWED_HOSTS = ['*']
-INTERNAL_IPS = ["127.0.0.1"]
+INTERNAL_IPS = ["127.0.0.1", '31.129.102.58']
+CSRF_TRUSTED_ORIGINS = ['31.129.102.58']
 
 # Application definition
 
