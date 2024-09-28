@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from .models import ReplenishmentBalance
 
 
 class DynamicOrderForm(forms.Form):
@@ -45,3 +46,23 @@ class DynamicOrderForm(forms.Form):
         if self.user.balance < total_price:
             raise ValidationError("У вас недостаточно средств")
         return quantity
+
+
+class CreateOrderForm(forms.ModelForm):
+    balance_for_replenishment = forms.DecimalField(
+        label='Balance for replenishment in dollars',
+        max_digits=11,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'placeholder': 'Enter amount in dollars'})
+    )
+
+    class Meta:
+        model = ReplenishmentBalance
+        fields = ["email", "balance_for_replenishment"]
+        labels = {
+            'email': "E-mail to contact you",
+            'balance_for_replenishment': 'Balance for replenishment in dollars'
+        }
+        widgets = {
+            'email': forms.EmailInput(attrs={'placeholder': 'Enter amount in dollars'})
+        }
