@@ -155,7 +155,7 @@ tbody td {
 }
 
 .service-form form input, .service-form form select {
-    height: 25px;
+    height: 30px;
     border: 1px solid rgb(23, 23, 28);
     border-radius: 5px;
     padding: 10px;
