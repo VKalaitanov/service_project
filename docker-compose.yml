@@ -45,10 +45,8 @@ services:
     image: postgres:alpine
     container_name: service_postgres
     restart: always
-    environment:
-      POSTGRES_DB: service_project
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data/
     healthcheck:
