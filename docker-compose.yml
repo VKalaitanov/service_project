@@ -19,8 +19,7 @@ services:
       - static:/app/static
       - media:/app/media
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     command: sh -c "python manage.py collectstatic --no-input &&
                     python manage.py makemigrations &&
                     python manage.py migrate && 
@@ -32,12 +31,11 @@ services:
     image: nginx:stable-alpine
     restart: always
     ports:
-      - "80:80"
+      - "81:80"
       - "443:443"
     volumes:
       - static:/app/static
       - media:/app/media
-      - ./nginx/:/etc/nginx/conf.d:ro
     depends_on:
       - django
 
@@ -45,14 +43,10 @@ services:
     image: postgres:alpine
     container_name: service_postgres
     restart: always
-    environment:
-      POSTGRES_DB: service_project
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
+    env_file:
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data/
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
+
+
