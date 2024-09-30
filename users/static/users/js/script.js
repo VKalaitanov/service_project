@@ -51,7 +51,6 @@ function getCookie(name) {
 // Функция для повторной отправки письма с AJAX запросом
 function resendEmail() {
     const csrftoken = getCookie('csrftoken');  // Получаем CSRF токен
-    console.log("CSRF Token: ", csrftoken);    // Проверяем, что CSRF токен не пустой
 
     fetch("http://31.129.102.58:80/users/resend-verification-email/", {
         method: 'POST',
