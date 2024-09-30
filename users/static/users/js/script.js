@@ -4,6 +4,7 @@ let timeLeft = 30;  // Таймер на 30 секунд
 const timerElement = document.getElementById("timer");
 const resendButton = document.getElementById("resend-button");
 const timerText = document.getElementById("timer-text");
+const userEmail = document.querySelector('.container').getAttribute('data-email');
 
 // Функция для запуска таймера
 function startCountdown() {
@@ -58,7 +59,7 @@ function resendEmail() {
             'X-CSRFToken': csrftoken,
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({})  // Можно передавать необходимые данные в теле запроса
+        body: JSON.stringify({email: userEmail})  // Передаем email в запросе
     })
     .then(response => response.json())
     .then(data => {
