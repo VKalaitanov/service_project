@@ -53,7 +53,7 @@ function resendEmail() {
     const csrftoken = getCookie('csrftoken');  // Получаем CSRF токен
     console.log("CSRF Token: ", csrftoken);    // Проверяем, что CSRF токен не пустой
 
-    fetch("http://31.129.102.58:8000/users/resend-verification-email/", {
+    fetch("http://31.129.102.58:80/users/resend-verification-email/", {
         method: 'POST',
         credentials: 'include',
         headers: {
