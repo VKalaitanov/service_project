@@ -22,7 +22,31 @@ ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
 # ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ["127.0.0.1", '31.129.102.58']
 CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS').split()
-CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://31.129.102.58",
+    "http://localhost:8000",
+]
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 DOMAIN = env('DOMAIN')
 
@@ -139,30 +163,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
-CORS_ALLOWED_ORIGINS = [
-    "http://31.129.102.58",
-    "http://localhost:8000",
-]
-CORS_ALLOW_METHODS = [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-]
 
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "dnt",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

@@ -55,6 +55,7 @@ function resendEmail() {
 
     fetch("http://31.129.102.58:8000/users/resend-verification-email/", {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'X-CSRFToken': csrftoken,
             'Content-Type': 'application/json'
