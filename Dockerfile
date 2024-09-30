@@ -25,6 +25,5 @@ COPY . .
 
 # Настройка записи и доступа
 RUN chmod -R 777 ./
-RUN chmod -R 755 /app/static
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "service_project.wsgi:application"]
