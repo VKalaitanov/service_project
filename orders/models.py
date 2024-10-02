@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from djmoney.models.fields import MoneyField
 from users.models import CustomerUser
 
@@ -78,6 +79,13 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     notes = models.TextField(blank=True, verbose_name="Примечания")
+
+    completed = models.DateTimeField(null=True, blank=True, verbose_name='Время завершения')
+
+    def save(self, *args, **kwargs):
+        if self.status == self.ChoicesStatus.COMPLETED and not self.completed:
+            self.completed = timezone.now()
+        super().save(*args, **kwargs)
 
     def calculate_total_price(self):
         self.total_price = self.service_option.price_per_unit * self.quantity  # type: ignore

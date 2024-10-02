@@ -53,6 +53,7 @@ class OrderAdmin(admin.ModelAdmin):
         'status',
         'period',
         'created_at',
+        'completed',
         'notes'
     ]
 
@@ -62,7 +63,8 @@ class OrderAdmin(admin.ModelAdmin):
         'user',
         'quantity',
         'created_at',
-        'total_price'
+        'total_price',
+        'completed'
     ]
 
     list_display = [
