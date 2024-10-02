@@ -42,6 +42,7 @@ class ServiceOption(models.Model):
 class Order(models.Model):
     class ChoicesStatus(models.Choices):
         PENDING = 'pending'
+        RUNNING = 'running'
         COMPLETED = 'completed'
 
     class PeriodChoices(models.Choices):
@@ -76,6 +77,8 @@ class Order(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
+    notes = models.TextField(blank=True, verbose_name="Примечания")
+
     def calculate_total_price(self):
         self.total_price = self.service_option.price_per_unit * self.quantity  # type: ignore
         self.save()
@@ -91,6 +94,7 @@ class Order(models.Model):
 class ReplenishmentBalance(models.Model):
     class ChoicesStatus(models.Choices):
         PENDING = 'pending'
+        RUNNING = 'running'
         COMPLETED = 'completed'
 
     user = models.ForeignKey(CustomerUser, on_delete=models.CASCADE, related_name='replenishment')

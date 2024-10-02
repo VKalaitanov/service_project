@@ -35,6 +35,8 @@ class ReplenishmentBalanceAdmin(admin.ModelAdmin):
 
     list_display_links = list_display
 
+    search_fields = ['user']
+
     def has_add_permission(self, request):
         return False
 
@@ -50,7 +52,8 @@ class OrderAdmin(admin.ModelAdmin):
         'total_price',
         'status',
         'period',
-        'created_at'
+        'created_at',
+        'notes'
     ]
 
     readonly_fields = [
@@ -63,11 +66,14 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     list_display = [
+        'service',
+        'service_option',
         'user',
         'total_price'
     ]
 
     list_display_links = list_display
+    search_fields = ['user']
 
     def has_add_permission(self, request):
         return False

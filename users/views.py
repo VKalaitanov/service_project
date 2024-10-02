@@ -147,7 +147,7 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
                 form = DynamicOrderForm(service_option=service_option)
                 forms.append((service, service_option, form))
 
-        orders = Order.objects.filter(user=self.request.user).select_related('service_option', 'service')
+        orders = Order.objects.filter(user=self.request.user).order_by('-created_at').select_related('service_option', 'service')
 
         context['forms'] = forms
         context['services'] = services

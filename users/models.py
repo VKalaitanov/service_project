@@ -41,3 +41,23 @@ class CustomerUser(AbstractUser):
         return self.email
 
     objects = CustomerUserManager()
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            old_balance = CustomerUser.objects.get(pk=self.pk).balance
+            if old_balance != self.balance:
+                # Записываем изменения в историю
+                BalanceHistory.objects.create(
+                    user=self,
+                    old_balance=old_balance,
+                    new_balance=self.balance,
+                )
+
+        super().save(*args, **kwargs)
+
+
+class BalanceHistory(models.Model):
+    user = models.ForeignKey('CustomerUser', on_delete=models.CASCADE, related_name='balance_history')
+    old_balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
+    new_balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
+    create_time = models.DateTimeField(auto_now_add=True)
