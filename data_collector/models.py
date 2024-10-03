@@ -34,7 +34,14 @@ class DailyOrderAnalytics(models.Model):
 
 class AllTimeOrderAnalytics(models.Model):
     """Модель для хранения аналитики заказов за всё время"""
-    ...
+    total_orders = models.IntegerField(default=0, verbose_name="Общее количество заказов за все время")
+    completed_orders = models.IntegerField(default=0, verbose_name="Количество завершённых заказов за все время")
+    total_revenue = MoneyField(max_digits=12, decimal_places=2, default_currency='USD', default=0,
+                               verbose_name="Общий доход за все время")
+    info_completed_orders = models.JSONField(default=default_info_completed_orders,
+                                             verbose_name="Выполненые заказы за все время")
+
+    objects = models.Manager()
 
     def __str__(self):
         return "Общая аналитика"
