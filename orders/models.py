@@ -83,7 +83,7 @@ class Order(models.Model):
     completed = models.DateTimeField(null=True, blank=True, verbose_name='Время завершения')
 
     def save(self, *args, **kwargs):
-        if self.status == self.ChoicesStatus.COMPLETED and not self.completed:
+        if self.status == self.ChoicesStatus.COMPLETED.value and self.completed is None:
             self.completed = timezone.now()
         super().save(*args, **kwargs)
 
