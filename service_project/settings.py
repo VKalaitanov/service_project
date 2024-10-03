@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 import environ
 
@@ -16,10 +17,10 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = int(env('DEBUG', default=1))
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
-# ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
+ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ["127.0.0.1", '31.129.102.58']
 CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS').split()
 
@@ -105,23 +106,23 @@ WSGI_APPLICATION = 'service_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('POSTGRES_DB'),
+#         'USER': env('POSTGRES_USER'),
+#         'PASSWORD': env('POSTGRES_PASSWORD'),
+#         'HOST': env('POSTGRES_HOST'),
+#         'PORT': env('POSTGRES_PORT'),
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -200,3 +201,13 @@ EMAIL_ADMIN = EMAIL_HOST_USER
 LOGIN_REDIRECT_URL = 'users:profile'
 LOGOUT_REDIRECT_URL = 'service:home'
 LOGIN_URL = 'users:login'
+
+
+INSTALLED_APPS += ['axes']
+
+MIDDLEWARE += ['axes.middleware.AxesMiddleware']
+
+# Настройки для блокировки IP после 5 попыток входа
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=1)
+AXES_LOCK_OUT_BY_IP_ONLY = True  # блокировать по IP

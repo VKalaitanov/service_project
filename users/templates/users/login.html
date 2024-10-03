@@ -24,11 +24,6 @@
                     {% endfor %}
                 <button type="submit" class="login-btn">Sign in system</button>
             </form>
-            <div class="or-divider">OR</div>
-            <button class="google-btn">
-                <img src="/media/google-logo.png" alt="Google Logo">
-                Sign in with Google
-            </button>
             <a href="{% url 'users:register' %}"><button type="submit" class="login-btn">Register</button></a>
             {% endblock content_users %}
         </div>

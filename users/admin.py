@@ -14,6 +14,7 @@ class AdminCustomerUser(admin.ModelAdmin):
     readonly_fields = ['email', 'order_user', 'sum_order', 'link_for_orders', 'get_history_balance']
     list_display = ['email', 'balance', 'order_user']
     search_fields = ['email']
+    list_editable = ['balance']
 
     @admin.display(description="Количество активных заказов")
     def order_user(self, obj) -> Union[str, int]:
@@ -29,12 +30,12 @@ class AdminCustomerUser(admin.ModelAdmin):
             return sum([order.total_price for order in orders])
         return 0
 
-    @admin.display(description='ID заказов')
+    @admin.display(description='Название заказов')
     def link_for_orders(self, obj):
         orders = obj.orders.filter(status='pending')
         if orders:
             links = [
-                f"<a href='http://127.0.0.1:8000/admin/orders/order/{order.pk}/change/'>{order.pk}</a>"
+                f"<a href='http://127.0.0.1:8000/admin/orders/order/{order.pk}/change/'>{order.service_option}</a>"
                 for order in orders
             ]
             return mark_safe(", ".join(links))

@@ -30,7 +30,9 @@ class ReplenishmentBalanceAdmin(admin.ModelAdmin):
 
     list_display = [
         'user',
-        'balance_for_replenishment'
+        'balance_for_replenishment',
+        'email',
+        'status'
     ]
 
     list_display_links = list_display
@@ -68,10 +70,13 @@ class OrderAdmin(admin.ModelAdmin):
     ]
 
     list_display = [
-        'service',
-        'service_option',
         'user',
-        'total_price'
+        'total_price',
+        'service_option',
+        'quantity',
+        'status',
+        'period',
+        'created_at'
     ]
 
     list_display_links = list_display

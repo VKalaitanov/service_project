@@ -9,3 +9,4 @@ django-money
 django-debug-toolbar
 gunicorn
 django-cors-headers==4.3.1
+django-axes

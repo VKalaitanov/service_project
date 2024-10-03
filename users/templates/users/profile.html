@@ -32,7 +32,35 @@
         </form>
     </div>
 </header>
+<div id="modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Replenish Balance</h3>
+        <form id="balance-form" method="post" data-url="{% url 'order:create-order' %}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
 
+            <div class="mb-3">
+                <label for="id_email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="id_email" name="email" value="{{ form.email.value }}">
+                {{ form.email.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_balance_for_replenishment" class="form-label">Balance for Replenishment</label>
+                <input type="number" class="form-control" id="id_balance_for_replenishment"
+                       name="balance_for_replenishment"
+                       value="{{ form.balance_for_replenishment.value }}" required>
+                {{ form.balance_for_replenishment.errors }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <div id="balance-form-message" style="display: none;"></div> <!-- Блок для ошибок -->
+    </div>
+</div>
+
+<div id="success-message" style="display: none;"></div> <!-- Блок для успешного сообщения -->
 <main>
     <section class="services">
         <h2>Select Services</h2>
@@ -51,7 +79,7 @@
         {% for service, service_option, form in forms %}
         <div id="form-{{ service_option.id }}" class="service-form" style="display:none;">
             <h3>{{ service.name }} - {{ service_option.name }}</h3>
-            <form method="POST">
+            <form method="POST" class="purchase-form">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <button type="submit" class="btn btn-primary">Buy</button>
@@ -59,8 +87,6 @@
         </div>
         {% endfor %}
     </section>
-
-    <script src="{% static 'users/js/profile_form.js' %}"></script>
 
 
     <section class="user-orders">
@@ -108,5 +134,8 @@
         {% endif %}
     </section>
 </main>
+
+<script src="{% static 'users/js/profile_form.js' %}"></script>
+<script src="{% static 'users/js/order_form.js' %}"></script>
 </body>
 </html>

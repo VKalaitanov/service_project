@@ -97,6 +97,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
+        ordering = ('-created_at', )
 
 
 class ReplenishmentBalance(models.Model):
