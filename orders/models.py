@@ -81,10 +81,15 @@ class Order(models.Model):
     notes = models.TextField(blank=True, verbose_name="Примечания")
 
     completed = models.DateTimeField(null=True, blank=True, verbose_name='Время завершения')
+    admin_completed_order = models.CharField(max_length=255,
+                                             blank=True, null=True,
+                                             verbose_name='Завершено администратором')
 
     def save(self, *args, **kwargs):
         if self.status == self.ChoicesStatus.COMPLETED.value and self.completed is None:
             self.completed = timezone.now()
+            if 'user' in kwargs:
+                self.admin_completed_order = kwargs.pop('user').email
         super().save(*args, **kwargs)
 
     def calculate_total_price(self):

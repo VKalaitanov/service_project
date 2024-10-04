@@ -56,6 +56,7 @@ class OrderAdmin(admin.ModelAdmin):
         'period',
         'created_at',
         'completed',
+        'admin_completed_order',
         'notes'
     ]
 
@@ -66,7 +67,8 @@ class OrderAdmin(admin.ModelAdmin):
         'quantity',
         'created_at',
         'total_price',
-        'completed'
+        'completed',
+        'admin_completed_order'
     ]
 
     list_display = [
@@ -81,6 +83,9 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_display_links = list_display
     search_fields = ['user']
+
+    def save_model(self, request, obj, form, change):
+        obj.save(user=request.user)
 
     def has_add_permission(self, request):
         return False
