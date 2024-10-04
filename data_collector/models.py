@@ -20,7 +20,7 @@ class DailyOrderAnalytics(models.Model):
     total_revenue = MoneyField(max_digits=12, decimal_places=2, default_currency='USD', default=0,
                                verbose_name="Общий доход за день")
     info_completed_orders = models.JSONField(default=default_info_completed_orders,
-                                             verbose_name="Выполненые заказы")
+                                             verbose_name="Выполненные заказы")
 
     objects = models.Manager()
 
@@ -39,9 +39,13 @@ class AllTimeOrderAnalytics(models.Model):
     total_revenue = MoneyField(max_digits=12, decimal_places=2, default_currency='USD', default=0,
                                verbose_name="Общий доход за все время")
     info_completed_orders = models.JSONField(default=default_info_completed_orders,
-                                             verbose_name="Выполненые заказы за все время")
+                                             verbose_name="Выполненные заказы за все время")
 
     objects = models.Manager()
+
+    class Meta:
+        verbose_name = "Полная аналитика"
+        verbose_name_plural = "Общая аналитика"
 
     def __str__(self):
         return "Общая аналитика"
