@@ -29,3 +29,4 @@ document.querySelectorAll('.purchase-form').forEach(function(form) {
         }
     });
 });
+

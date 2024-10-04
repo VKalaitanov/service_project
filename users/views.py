@@ -159,14 +159,18 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
     def post(self, request, *args, **kwargs):
         services = Service.objects.all()
         forms = []
+        user = self.request.user
+        has_errors = False
+        response_data = {
+            'errors': []
+        }
 
         if request.method == 'POST':
-            user = get_user_model().objects.get(email=self.request.user)
             for service in services:
                 service_options = service.options.all()
                 for service_option in service_options:
                     form = DynamicOrderForm(request.POST, service_option=service_option, user=user)
-                    forms.append((service, service_option, form))
+                    forms.append((service, service_option, form))  # Сохраняем формы для контекста
 
                     if form.is_valid():
                         custom_data = {}
@@ -175,16 +179,38 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
 
                         period = form.cleaned_data.get('period') if service_option.has_period else None
 
-                        self.place_an_order(
-                            user=user, service=service,
-                            service_option=service_option, custom_data=custom_data,
-                            quantity=form.cleaned_data['quantity'], period=period
-                        )
-            # После успешного создания всех заказов перенаправляем пользователя
-            return redirect(self.get_success_url())
+                        try:
+                            # Создаем заказ через метод place_an_order
+                            self.place_an_order(
+                                user=user, service=service,
+                                service_option=service_option, custom_data=custom_data,
+                                quantity=form.cleaned_data['quantity'], period=period
+                            )
+                        except ValueError as e:
+                            has_errors = True
+                            request.session['order_error'] = str(e)  # Сохраняем сообщение в сессию
+                        else:
+                            # Возвращаем успешный ответ для AJAX-запроса
+                            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                                return JsonResponse({'redirect_url': self.get_success_url()})
 
-        # Если форма не валидна или это не POST-запрос, рендерим страницу заново
+                    else:
+                        has_errors = True
+                        for error_list in form.errors.values():
+                            for error in error_list:
+                                request.session.setdefault('order_errors', []).append(error)
+
+            if has_errors:
+                context = self.get_context_data()
+                context['forms'] = forms
+                context['order_errors'] = request.session.pop('order_errors', None)
+                return self.render_to_response(context)
+
+            # Если нет ошибок, возвращаем успешный ответ
+            return redirect('users:profile')
+
         context = self.get_context_data()
+        context['forms'] = forms
         return self.render_to_response(context)
 
     def get_success_url(self):

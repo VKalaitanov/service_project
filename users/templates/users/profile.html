@@ -60,7 +60,6 @@
     </div>
 </div>
 
-<div id="success-message" style="display: none;"></div> <!-- Блок для успешного сообщения -->
 <main>
     <section class="services">
         <h2>Select Services</h2>
@@ -74,20 +73,36 @@
         </div>
     </section>
 
+    <div class="error-message-container">
+        {% if order_errors %}
+        <div id="error-message" class="error-message">
+            {% for error in order_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
     <!-- Формы для каждого сервиса -->
     <section class="service-forms">
         {% for service, service_option, form in forms %}
         <div id="form-{{ service_option.id }}" class="service-form" style="display:none;">
             <h3>{{ service.name }} - {{ service_option.name }}</h3>
-            <form method="POST" class="purchase-form">
+            <form method="POST" id="myForm" class="purchase-form"
+                  data-price-per-unit="{{ service_option.price_per_unit }}">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Buy</button>
+                <div class="button-div">
+                    <button type="submit" class="btn btn-primary">
+                        Buy
+                        <span id="total-price-{{ service_option.id }}" class="button-price"></span>
+                    </button>
+                </div>
+
             </form>
         </div>
         {% endfor %}
     </section>
-
 
     <section class="user-orders">
         <h2>Your Orders</h2>
@@ -137,5 +152,33 @@
 
 <script src="{% static 'users/js/profile_form.js' %}"></script>
 <script src="{% static 'users/js/order_form.js' %}"></script>
+
+<script>
+    document.querySelectorAll('.purchase-form').forEach(function(form) {
+        var quantityInput = form.querySelector('input[name="quantity"]');
+        var totalPriceElement = form.querySelector('[id^="total-price"]');
+        var pricePerUnit = parseFloat(form.getAttribute('data-price-per-unit').replace(',', '.').trim());  // Заменяем запятую на точку
+
+        quantityInput.addEventListener('input', function() {
+            var quantity = parseInt(quantityInput.value) || 0;  // Убедитесь, что это число
+            var totalPrice = pricePerUnit * quantity;
+
+            totalPriceElement.textContent = totalPrice.toFixed(2) + ' $';  // Обновляем сумму
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const errorMessage = document.getElementById("error-message");
+        if (errorMessage) {
+            setTimeout(() => {
+                errorMessage.style.display = "none"; // Скрыть сообщение через 4 секунды
+            }, 4000);
+        }
+    });
+</script>
+
+
 </body>
 </html>
