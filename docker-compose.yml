@@ -62,9 +62,9 @@ services:
     image: postgres:alpine
     container_name: service_postgres_backup
     volumes:
-      - backups:/backups  # Для хранения бэкапов
+      - ./backups:/backups  # Монтируем локальную директорию для хранения бэкапов
     depends_on:
       - postgres
-    entrypoint: /bin/sh -c "crontab -l | { cat; echo '*/2 * * * * PGPASSWORD=${POSTGRES_PASSWORD} pg_dump -h postgres -U postgres service_db > /backups/service_db_$(date +\%Y-\%m-\%d_\%H-\%M-\%S).sql'; } | crontab - && crond -f"
+    entrypoint: /bin/sh -c "crontab -l | { cat; echo '0 7 * * * PGPASSWORD=${POSTGRES_PASSWORD} pg_dump -h postgres -U postgres service_db > /backups/service_db_$(date +\%Y-\%m-\%d_\%H-\%M-\%S).sql'; echo '0 8 * * * find /backups/* -mtime +30 -exec rm {} \\;'; } | crontab - && crond -f"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
