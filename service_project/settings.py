@@ -175,6 +175,7 @@ AUTH_USER_MODEL = 'users.CustomerUser'
 
 AUTHENTICATION_BACKENDS = [
     'users.authentication.EmailAuthBackend',
+    'axes.backends.AxesStandaloneBackend'
 ]
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
