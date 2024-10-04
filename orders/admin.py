@@ -85,7 +85,9 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['user']
 
     def save_model(self, request, obj, form, change):
-        obj.save(user=request.user)
+        if obj.status == obj.ChoicesStatus.COMPLETED.value and obj.completed is None:
+            obj.admin_completed_order = request.user.email  # Устанавливаем email администратора
+        obj.save()  # Сохраняем объект без передачи аргумента user
 
     def has_add_permission(self, request):
         return False

@@ -88,9 +88,7 @@ class Order(models.Model):
     def save(self, *args, **kwargs):
         if self.status == self.ChoicesStatus.COMPLETED.value and self.completed is None:
             self.completed = timezone.now()
-            if 'user' in kwargs:
-                self.admin_completed_order = kwargs.pop('user').email
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs)  # Сохраняем объект перед изменением admin_completed_order
 
     def calculate_total_price(self):
         self.total_price = self.service_option.price_per_unit * self.quantity  # type: ignore
