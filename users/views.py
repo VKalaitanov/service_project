@@ -204,7 +204,7 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
                 return self.render_to_response(context)
 
         # Если всё прошло успешно, перенаправляем пользователя
-        return JsonResponse({'redirect_url': self.get_success_url()})
+        return redirect('users:profile')
 
     def get_success_url(self):
         return reverse_lazy('users:profile')
