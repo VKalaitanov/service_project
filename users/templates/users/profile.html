@@ -179,6 +179,41 @@
     });
 </script>
 
+<script>
+    document.querySelectorAll('.purchase-form').forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        if (data.errors) {
+                            var errorContainer = form.querySelector('.error-container');
+                            errorContainer.innerHTML = '';  // Очищаем предыдущие ошибки
+                            data.errors.forEach(error => {
+                                var errorElement = document.createElement('div');
+                                errorElement.classList.add('alert', 'alert-danger');
+                                errorElement.textContent = error;
+                                errorContainer.appendChild(errorElement);
+                            });
+                        }
+                    });
+                } else {
+                    window.location.href = data.redirect_url;  // Перенаправление при успешном ответе
+                }
+            });
+        });
+    });
+</script>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -186,7 +221,7 @@
         if (errorMessage) {
             setTimeout(() => {
                 errorMessage.style.display = "none"; // Скрыть сообщение через 4 секунды
-            }, 4000);
+            }, 114000);
         }
     });
 </script>

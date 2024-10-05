@@ -137,7 +137,6 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         services = Service.objects.all().prefetch_related('options')  # Получаем все доступные сервисы
         forms = []
 
@@ -147,8 +146,7 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
                 form = DynamicOrderForm(service_option=service_option)
                 forms.append((service, service_option, form))
 
-        orders = Order.objects.filter(user=self.request.user).order_by('-created_at').select_related('service_option',
-                                                                                                     'service')
+        orders = Order.objects.filter(user=self.request.user).order_by('-created_at').select_related('service_option', 'service')
 
         context['forms'] = forms
         context['services'] = services
@@ -158,8 +156,13 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
 
     def post(self, request, *args, **kwargs):
         user = self.request.user
-        service_option_id = request.POST.get('service_option_id')
         has_errors = False
+        response_data = {
+            'errors': []
+        }
+
+        # Получаем ID выбранной опции услуги из POST-запроса
+        service_option_id = request.POST.get('service_option_id')
 
         if service_option_id:  # Проверяем, была ли отправлена форма
             try:
@@ -181,25 +184,27 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
                         )
                     except ValueError as e:
                         has_errors = True
-                        request.session['order_errors'] = [str(e)]
-                    else:
-                        # Возвращаем успешный ответ для AJAX-запроса
-                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                            return JsonResponse({'redirect_url': self.get_success_url()})
+                        response_data['errors'].append(str(e))
+
                 else:
                     has_errors = True
-                    request.session['order_errors'] = form.errors
+                    response_data['errors'].extend(form.errors.values())
 
             except ServiceOption.DoesNotExist:
                 has_errors = True
-                request.session['order_errors'] = ["Service option not found"]
+                response_data['errors'].append("Service option not found")
 
         if has_errors:
-            context = self.get_context_data()
-            context['order_errors'] = request.session.pop('order_errors', None)
-            return self.render_to_response(context)
+            # Если есть ошибки, возвращаем их в формате JSON для AJAX-запроса
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse(response_data, status=400)
+            else:
+                context = self.get_context_data()
+                context['order_errors'] = response_data['errors']
+                return self.render_to_response(context)
 
-        return redirect('users:profile')
+        # Если всё прошло успешно, перенаправляем пользователя
+        return JsonResponse({'redirect_url': self.get_success_url()})
 
     def get_success_url(self):
         return reverse_lazy('users:profile')
