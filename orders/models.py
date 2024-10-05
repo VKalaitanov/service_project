@@ -25,12 +25,19 @@ class ServiceOption(models.Model):
     price_per_unit = MoneyField(max_digits=10, decimal_places=2,
                                 verbose_name='Цена', default=0,
                                 default_currency="USD")
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, verbose_name="Скидка (%)")
 
     required_fields = models.JSONField(default=dict, verbose_name="Поля для заполнения")  # Динамические поля для услуги
     has_period = models.BooleanField(default=False,
                                      verbose_name="Добавить период", )
     #  Указывает, нужно ли поле "period" для этой услуги
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_discounted_price(self):
+        """Возвращает цену с учётом скидки"""
+        if self.discount_percentage > 0:
+            return self.price_per_unit * (1 - self.discount_percentage / 100)
+        return self.price_per_unit
 
     def __str__(self):
         return f"{self.name} for {self.service.name}"
@@ -91,7 +98,9 @@ class Order(models.Model):
         super().save(*args, **kwargs)  # Сохраняем объект перед изменением admin_completed_order
 
     def calculate_total_price(self):
-        self.total_price = self.service_option.price_per_unit * self.quantity  # type: ignore
+        """Рассчитывает общую стоимость с учётом скидки"""
+        discounted_price = self.service_option.get_discounted_price()  # Получаем цену с учётом скидки
+        self.total_price = discounted_price * self.quantity
         self.save()
 
     def __str__(self):
@@ -100,7 +109,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
-        ordering = ('-created_at', )
+        ordering = ('-created_at',)
 
 
 class ReplenishmentBalance(models.Model):

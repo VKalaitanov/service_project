@@ -90,7 +90,8 @@
         <div id="form-{{ service_option.id }}" class="service-form" style="display:none;">
             <h3>{{ service.name }} - {{ service_option.name }}</h3>
             <form method="POST" id="myForm" class="purchase-form"
-                  data-price-per-unit="{{ service_option.price_per_unit }}">
+                  data-price-per-unit="{{ service_option.price_per_unit }}"
+                  data-discount-percentage="{{ service_option.discount_percentage }}">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <div class="button-div">
@@ -98,6 +99,11 @@
                         Buy
                         <span id="total-price-{{ service_option.id }}" class="button-price"></span>
                     </button>
+                    <span>
+                        {% if service_option.discount_percentage %}
+                            Discount price: <span class="discount-price">- {{ service_option.discount_percentage }}%</span>
+                        {% endif %}
+                    </span>
                 </div>
 
             </form>
@@ -158,16 +164,21 @@
     document.querySelectorAll('.purchase-form').forEach(function(form) {
         var quantityInput = form.querySelector('input[name="quantity"]');
         var totalPriceElement = form.querySelector('[id^="total-price"]');
-        var pricePerUnit = parseFloat(form.getAttribute('data-price-per-unit').replace(',', '.').trim());  // Заменяем запятую на точку
+        var pricePerUnit = parseFloat(form.getAttribute('data-price-per-unit').replace(',', '.').trim());
+        var discountPercentage = parseFloat(form.getAttribute('data-discount-percentage').replace(',', '.').trim()) || 0;
 
         quantityInput.addEventListener('input', function() {
-            var quantity = parseInt(quantityInput.value) || 0;  // Убедитесь, что это число
+            var quantity = parseInt(quantityInput.value) || 0;
             var totalPrice = pricePerUnit * quantity;
 
-            totalPriceElement.textContent = totalPrice.toFixed(2) + ' $';  // Обновляем сумму
+            var discount = (totalPrice * discountPercentage) / 100;
+            var finalPrice = totalPrice - discount;
+
+            totalPriceElement.textContent = finalPrice.toFixed(2) + ' $';
         });
     });
 </script>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

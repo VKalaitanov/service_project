@@ -217,6 +217,16 @@ tbody td {
     align-items: center;
     justify-content: center;
     font-size: 14px;
+    margin-right: 10px;
+}
+
+.discount-price {
+    color: red;
+}
+
+.button-div {
+    display: flex;
+    align-items: center;
 }
 
 .button-price {
