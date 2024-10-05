@@ -13,7 +13,7 @@ from django.views.generic import CreateView, TemplateView
 from .forms import LoginUserForm, RegisterUserForm
 from .utils import account_activation_token, send_verification_email
 from orders.forms import DynamicOrderForm
-from orders.models import Order, Service
+from orders.models import Order, Service, ServiceOption
 from .service import ControlBalance
 
 
@@ -157,61 +157,49 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
         return context
 
     def post(self, request, *args, **kwargs):
-        services = Service.objects.all()
-        forms = []
         user = self.request.user
+        service_option_id = request.POST.get('service_option_id')
         has_errors = False
-        response_data = {
-            'errors': []
-        }
 
-        if request.method == 'POST':
-            for service in services:
-                service_options = service.options.all()
-                for service_option in service_options:
-                    form = DynamicOrderForm(request.POST, service_option=service_option, user=user)
-                    forms.append((service, service_option, form))  # Сохраняем формы для контекста
+        if service_option_id:  # Проверяем, была ли отправлена форма
+            try:
+                service_option = ServiceOption.objects.get(id=service_option_id)
+                form = DynamicOrderForm(request.POST, service_option=service_option, user=user)
 
-                    if form.is_valid():
-                        custom_data = {}
-                        for field_name in service_option.required_fields.keys():
-                            custom_data[field_name] = form.cleaned_data[field_name]
+                if form.is_valid():
+                    custom_data = {}
+                    for field_name in service_option.required_fields.keys():
+                        custom_data[field_name] = form.cleaned_data[field_name]
 
-                        period = form.cleaned_data.get('period') if service_option.has_period else None
+                    period = form.cleaned_data.get('period') if service_option.has_period else None
 
-                        try:
-                            # Создаем заказ через метод place_an_order
-                            self.place_an_order(
-                                user=user, service=service,
-                                service_option=service_option, custom_data=custom_data,
-                                quantity=form.cleaned_data['quantity'], period=period
-                            )
-                        except ValueError as e:
-                            has_errors = True
-                            request.session['order_error'] = str(e)  # Сохраняем сообщение в сессию
-                        else:
-                            # Возвращаем успешный ответ для AJAX-запроса
-                            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                                return JsonResponse({'redirect_url': self.get_success_url()})
-
-                    else:
+                    try:
+                        self.place_an_order(
+                            user=user, service=service_option.service,
+                            service_option=service_option, custom_data=custom_data,
+                            quantity=form.cleaned_data['quantity'], period=period
+                        )
+                    except ValueError as e:
                         has_errors = True
-                        for error_list in form.errors.values():
-                            for error in error_list:
-                                request.session.setdefault('order_errors', []).append(error)
+                        request.session['order_errors'] = [str(e)]
+                    else:
+                        # Возвращаем успешный ответ для AJAX-запроса
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return JsonResponse({'redirect_url': self.get_success_url()})
+                else:
+                    has_errors = True
+                    request.session['order_errors'] = form.errors
 
-            if has_errors:
-                context = self.get_context_data()
-                context['forms'] = forms
-                context['order_errors'] = request.session.pop('order_errors', None)
-                return self.render_to_response(context)
+            except ServiceOption.DoesNotExist:
+                has_errors = True
+                request.session['order_errors'] = ["Service option not found"]
 
-            # Если нет ошибок, возвращаем успешный ответ
-            return redirect('users:profile')
+        if has_errors:
+            context = self.get_context_data()
+            context['order_errors'] = request.session.pop('order_errors', None)
+            return self.render_to_response(context)
 
-        context = self.get_context_data()
-        context['forms'] = forms
-        return self.render_to_response(context)
+        return redirect('users:profile')
 
     def get_success_url(self):
         return reverse_lazy('users:profile')

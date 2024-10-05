@@ -89,23 +89,23 @@
         {% for service, service_option, form in forms %}
         <div id="form-{{ service_option.id }}" class="service-form" style="display:none;">
             <h3>{{ service.name }} - {{ service_option.name }}</h3>
-            <form method="POST" id="myForm" class="purchase-form"
+            <form method="POST" id="myForm-{{ service_option.id }}" class="purchase-form"
                   data-price-per-unit="{{ service_option.price_per_unit }}"
                   data-discount-percentage="{{ service_option.discount_percentage }}">
                 {% csrf_token %}
                 {{ form.as_p }}
+                <input type="hidden" name="service_option_id" value="{{ service_option.id }}">
                 <div class="button-div">
                     <button type="submit" class="btn btn-primary">
                         Buy
                         <span id="total-price-{{ service_option.id }}" class="button-price"></span>
                     </button>
                     <span>
-                        {% if service_option.discount_percentage %}
-                            Discount price: <span class="discount-price">- {{ service_option.discount_percentage }}%</span>
-                        {% endif %}
-                    </span>
+            {% if service_option.discount_percentage %}
+                Discount price: <span class="discount-price">- {{ service_option.discount_percentage }}%</span>
+            {% endif %}
+        </span>
                 </div>
-
             </form>
         </div>
         {% endfor %}
