@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
@@ -11,6 +10,67 @@
           crossorigin="anonymous">
     <title>Dashboard</title>
     <link type="text/css" href="{% static 'users/css/users_profile.css' %}" rel="stylesheet"/>
+    <style>
+        /* Стили для чата в правом нижнем углу */
+        #chat-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background-color: black;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        #chat-header {
+            background-color: red;
+            color: black;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #chat-body {
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        #chat-footer {
+            display: flex;
+            border-top: 1px solid #ddd;
+            padding: 5px;
+        }
+
+        #chat-footer input {
+            flex: 1;
+            padding: 5px;
+        }
+
+        #chat-footer button {
+            margin-left: 5px;
+        }
+
+        #chat-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px;
+            background-color: red;
+            color: black;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            z-index: 1001;
+            font-size: 24px;
+        }
+    </style>
 </head>
 <body>
 <header class="header-item">
@@ -32,34 +92,6 @@
         </form>
     </div>
 </header>
-<div id="modal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h3>Replenish Balance</h3>
-        <form id="balance-form" method="post" data-url="{% url 'order:create-order' %}">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-
-            <div class="mb-3">
-                <label for="id_email" class="form-label">E-mail</label>
-                <input type="email" class="form-control" id="id_email" name="email" value="{{ form.email.value }}">
-                {{ form.email.errors }}
-            </div>
-
-            <div class="mb-3">
-                <label for="id_balance_for_replenishment" class="form-label">Balance for Replenishment</label>
-                <input type="number" class="form-control" id="id_balance_for_replenishment"
-                       name="balance_for_replenishment"
-                       value="{{ form.balance_for_replenishment.value }}" required>
-                {{ form.balance_for_replenishment.errors }}
-            </div>
-
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-        <div id="balance-form-message" style="display: none;"></div> <!-- Блок для ошибок -->
-    </div>
-</div>
-<div id="success-message" style="display: none;"></div> <!-- Блок для успешного сообщения -->
 
 <main>
     <section class="services">
@@ -156,41 +188,78 @@
         </table>
         {% endif %}
     </section>
+
+    <!-- Чат -->
+    <div id="chat-box">
+        <div id="chat-header">
+            <span>Chat</span>
+            <span id="close-chat" style="cursor: pointer;">&times;</span>
+        </div>
+        <div id="chat-body">
+            <p>Hello! How can I help you?</p>
+        </div>
+        <div id="chat-footer">
+            <input type="text" id="chat-input" placeholder="Type a message...">
+            <button id="send-message" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+
+    <!-- Кнопка для открытия чата -->
+    <button id="chat-toggle-btn">💬</button>
 </main>
 
 <script src="{% static 'users/js/profile_form.js' %}"></script>
 <script src="{% static 'users/js/order_form.js' %}"></script>
-
 <script>
-    document.querySelectorAll('.purchase-form').forEach(function(form) {
-        var quantityInput = form.querySelector('input[name="quantity"]');
-        var totalPriceElement = form.querySelector('[id^="total-price"]');
-        var pricePerUnit = parseFloat(form.getAttribute('data-price-per-unit').replace(',', '.').trim());
-        var discountPercentage = parseFloat(form.getAttribute('data-discount-percentage').replace(',', '.').trim()) || 0;
+// Подключение WebSocket для общения с админом
+const roomName = "{{ user.id }}";  // Идентификатор комнаты для текущего пользователя
 
-        quantityInput.addEventListener('input', function() {
-            var quantity = parseInt(quantityInput.value) || 0;
-            var totalPrice = pricePerUnit * quantity;
+const chatSocket = new WebSocket(
+    'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+);
 
-            var discount = (totalPrice * discountPercentage) / 100;
-            var finalPrice = totalPrice - discount;
+// Обработка входящих сообщений
+chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    const chatBody = document.querySelector('#chat-body');
+    const messageElement = document.createElement('p');
+    messageElement.textContent = data.message;
+    chatBody.appendChild(messageElement);
+    chatBody.scrollTop = chatBody.scrollHeight;  // Прокрутить чат вниз
+};
 
-            totalPriceElement.textContent = finalPrice.toFixed(2) + ' $';
-        });
-    });
+// Закрытие сокета
+chatSocket.onclose = function(e) {
+    console.error('Chat socket closed unexpectedly');
+};
+
+// Отправка сообщений
+document.querySelector('#send-message').onclick = function(e) {
+    const chatInput = document.querySelector('#chat-input');
+    const message = chatInput.value;
+
+    if (message.trim() !== '') {
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+        chatInput.value = '';
+    }
+};
+
+// Открытие и закрытие чата
+const chatBox = document.getElementById('chat-box');
+const chatToggleBtn = document.getElementById('chat-toggle-btn');
+const closeChatBtn = document.getElementById('close-chat');
+
+chatToggleBtn.addEventListener('click', function() {
+    chatBox.style.display = 'flex';
+    chatToggleBtn.style.display = 'none';  // Скрыть иконку
+});
+
+closeChatBtn.addEventListener('click', function() {
+    chatBox.style.display = 'none';
+    chatToggleBtn.style.display = 'block';  // Показать иконку снова
+});
 </script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const errorMessage = document.getElementById("error-message");
-        if (errorMessage) {
-            setTimeout(() => {
-                errorMessage.style.display = "none"; // Скрыть сообщение через 4 секунды
-            }, 4000);
-        }
-    });
-</script>
-
-
 </body>
 </html>

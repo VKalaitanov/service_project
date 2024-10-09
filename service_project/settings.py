@@ -17,12 +17,12 @@ SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = int(env('DEBUG', default=1))
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
+# ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
 # ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ["127.0.0.1", '31.129.102.58']
-CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS').split()
+# CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS').split()
 
 CORS_ALLOWED_ORIGINS = [
     "http://31.129.102.58",
@@ -49,11 +49,12 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-DOMAIN = env('DOMAIN')
+# DOMAIN = env('DOMAIN')
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -62,6 +63,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'djmoney',
+    'chat.apps.ChatConfig',
     # 'debug_toolbar',
     'service.apps.ServiceConfig',
     'users.apps.UsersConfig',
@@ -103,27 +105,39 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'service_project.wsgi.application'
+ASGI_APPLICATION = 'service_project.asgi.application'
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        # "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        # "CONFIG": {
+        #     "hosts": [("127.0.0.1", 6379)],
+        # },
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('POSTGRES_DB'),
+#         'USER': env('POSTGRES_USER'),
+#         'PASSWORD': env('POSTGRES_PASSWORD'),
+#         'HOST': env('POSTGRES_HOST'),
+#         'PORT': env('POSTGRES_PORT'),
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -157,7 +171,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # STATICFILES_DIRS = [
 #     BASE_DIR / 'staticfiles',
@@ -188,17 +202,17 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # SERVER_EMAIL = EMAIL_HOST_USER
 # EMAIL_ADMIN = EMAIL_HOST_USER
-
-EMAIL_HOST = env('EMAIL_HOST')
-EMAIL_PORT = env('EMAIL_PORT')
-EMAIL_USE_SSL = int(env('EMAIL_USE_SSL', default=1))
-
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-SERVER_EMAIL = EMAIL_HOST_USER
-EMAIL_ADMIN = EMAIL_HOST_USER
+#
+# EMAIL_HOST = env('EMAIL_HOST')
+# EMAIL_PORT = env('EMAIL_PORT')
+# EMAIL_USE_SSL = int(env('EMAIL_USE_SSL', default=1))
+#
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+#
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# SERVER_EMAIL = EMAIL_HOST_USER
+# EMAIL_ADMIN = EMAIL_HOST_USER
 
 LOGIN_REDIRECT_URL = 'users:profile'
 LOGOUT_REDIRECT_URL = 'service:home'
