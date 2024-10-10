@@ -6,7 +6,7 @@
 <body>
     <textarea id="chat-log" cols="100" rows="20" readonly>
         {% for message in messages %}
-            {{ message.user.email }}: {{ message.content }}
+            {{ message.user }}: {{ message.content }}
         {% endfor %}
     </textarea><br>
 
@@ -14,7 +14,7 @@
     <input id="chat-message-submit" type="button" value="Send">
 
     <script>
-        const roomName = "{{ room_name }}";  // Идентификатор комнаты для текущего пользователя
+        const roomName = "{{ id_room }}";  // Идентификатор комнаты для текущего пользователя
 
         const chatSocket = new WebSocket(
             'ws://' + window.location.host + '/ws/chat/' + roomName + '/'

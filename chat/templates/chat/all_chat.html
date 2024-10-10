@@ -6,7 +6,7 @@
 </head>
 <body>
     {% for i in chat %}
-    <h1>{{ i.room_name }}</h1>
+    <h1><a href="{{ i.get_absolute_url }}">i.user</a></h1>
     {% endfor %}
 </body>
 </html>
