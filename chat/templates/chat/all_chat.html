@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% for i in chat %}
+    <h1><a href="{{ i.get_absolute_url }}">i.user</a></h1>
+    {% endfor %}
+</body>
+</html>
