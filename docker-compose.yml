@@ -5,6 +5,7 @@ volumes:
   static:
   media:
   backups:  # Хранилище для бэкапов базы данных
+  redisdata:
 
 services:
   django:
@@ -68,3 +69,13 @@ services:
     entrypoint: /bin/sh -c "crontab -l | { cat; echo '0 7 * * * PGPASSWORD=${POSTGRES_PASSWORD} pg_dump -h postgres -U postgres service_db > /backups/service_db_$(date +\%Y-\%m-\%d_\%H-\%M-\%S).sql'; echo '0 8 * * * find /backups/* -mtime +30 -exec rm {} \\;'; } | crontab - && crond -f"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+
+  redis:
+    image: redis:alpine
+    container_name: service_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
