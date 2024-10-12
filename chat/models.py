@@ -9,11 +9,13 @@ class Room(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='room')
     managers = models.ManyToManyField(User, related_name='managed_rooms')
 
+    objects = models.Manager()
+
     def get_absolute_url(self):
         return reverse('index', kwargs={'id_room': self.pk})
 
     def __str__(self):
-        return f"Room {self.id} for {self.user.username}"
+        return f"Room {self.id} for {self.user.username}"    # type: ignore
 
 
 class Message(models.Model):
@@ -22,5 +24,7 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    objects = models.Manager()
+
     def __str__(self):
-        return f"{self.user.username}: {self.content[:20]}"
+        return f"{self.user.username}: {self.content[:20]}"  # type: ignore
