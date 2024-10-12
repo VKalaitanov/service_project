@@ -9,12 +9,13 @@ from .models import CustomerUser
 
 @admin.register(CustomerUser)
 class AdminCustomerUser(admin.ModelAdmin):
-    fields = ['email', 'balance', 'order_user', 'sum_order', 'link_for_orders', 'get_history_balance']
+    fields = ['email', 'balance', 'order_user', 'sum_order', 'link_for_orders', 'groups', 'get_history_balance']
     save_on_top = True
     readonly_fields = ['email', 'order_user', 'sum_order', 'link_for_orders', 'get_history_balance']
     list_display = ['email', 'balance', 'order_user']
     search_fields = ['email']
     list_editable = ['balance']
+    filter_horizontal = ['groups']
 
     @admin.display(description="Количество активных заказов")
     def order_user(self, obj) -> Union[str, int]:

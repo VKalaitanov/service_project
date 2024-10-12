@@ -19,7 +19,6 @@ class CustomerUserManager(BaseUserManager):
         """Create and return a superuser with an email and password."""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_manager', True)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -34,7 +33,6 @@ class CustomerUser(AbstractUser):
     username = models.CharField(blank=True, max_length=20)
     email = models.EmailField(unique=True)
     balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
-    is_manager = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
