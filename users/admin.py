@@ -37,7 +37,7 @@ class AdminCustomerUser(admin.ModelAdmin):
         orders = obj.orders.filter(status='pending')
         if orders:
             links = [
-                f"<a href='http://127.0.0.1:8000/secure-admin-path/orders/order/{order.pk}/change/'>{order.service_option}</a>"
+                f"<a href='http://31.129.102.58/secure-admin-path/orders/order/{order.pk}/change/'>{order.service_option}</a>"
                 for order in orders
             ]
             return mark_safe(", ".join(links))
