@@ -326,9 +326,6 @@
     <button id="chat-toggle-btn">💬</button>
 </main>
 
-<script src="{% static 'users/js/profile_form.js' %}"></script>
-<script src="{% static 'users/js/order_form.js' %}"></script>
-
 <script>
     // Подключение WebSocket для общения с админом
     const roomName = "{{ user.id }}";  // Идентификатор комнаты для текущего пользователя
@@ -474,5 +471,9 @@
     // Проверяем сразу, нужно ли скрыть весь блок глобальных сообщений
     checkAndHideGlobalMessages();
 </script>
+
+<script src="{% static 'users/js/profile_form.js' %}"></script>
+<script src="{% static 'users/js/order_form.js' %}"></script>
+
 </body>
 </html>
