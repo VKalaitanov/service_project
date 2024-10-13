@@ -17,7 +17,7 @@
         const roomName = "{{ id_room }}";  // Идентификатор комнаты для текущего пользователя
 
         const chatSocket = new WebSocket(
-            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+            'ws://31.129.102.58/ws/chat/' + roomName + '/'
         );
 
         chatSocket.onmessage = function(e) {

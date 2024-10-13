@@ -331,7 +331,7 @@
     const roomName = "{{ user.id }}";  // Идентификатор комнаты для текущего пользователя
 
     const chatSocket = new WebSocket(
-        'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        'ws://31.129.102.58/ws/chat/' + roomName + '/'
     );
 
     // Обработка входящих сообщений
@@ -472,7 +472,6 @@
     checkAndHideGlobalMessages();
 </script>
 
-<script src="{% static 'users/js/messages.js' %}"></script>
 <script src="{% static 'users/js/profile_form.js' %}"></script>
 <script src="{% static 'users/js/order_form.js' %}"></script>
 
