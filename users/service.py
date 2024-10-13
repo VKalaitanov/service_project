@@ -3,8 +3,8 @@ from orders.models import Order
 
 class ControlBalance:
 
-    def place_an_order(self, user, service, service_option, custom_data, quantity, period):
-        discounted_price = service_option.get_discounted_price()  # Рассчитываем цену с учётом скидки
+    def place_an_order(self, user, service, service_option, custom_data, quantity, period, comment):
+        discounted_price = service_option.get_discounted_price(user=user)  # Передаем пользователя
         total_price = discounted_price * quantity
 
         if user.balance < total_price:
@@ -21,5 +21,6 @@ class ControlBalance:
             quantity=quantity,
             total_price=total_price,
             status='pending',
-            period=period
+            period=period,
+            comment=comment,
         )

@@ -7,6 +7,7 @@ from .models import ReplenishmentBalance, ServiceOption
 
 class DynamicOrderForm(forms.Form):
     quantity = forms.IntegerField(label="Количество", min_value=1)
+    comment = forms.CharField(label='Комментарий', max_length=255, required=False)
 
     PERIOD_CHOICES = [
         ('Hour', 'Hour'),
@@ -34,10 +35,11 @@ class DynamicOrderForm(forms.Form):
             )
 
         # Определяем порядок полей: динамические поля -> period -> quantity
-        field_order = list(self.fields.keys() - ['period', 'quantity'])  # Все динамические поля
+        field_order = list(self.fields.keys() - ['period', 'quantity', 'comment'])  # Все динамические поля
         if 'period' in self.fields:
             field_order.append('period')  # Добавляем period перед quantity, если поле есть
-        field_order.append('quantity')  # Добавляем quantity в конец
+        field_order.append('quantity')
+        field_order.append('comment')
 
         # Применяем порядок
         self.order_fields(field_order)

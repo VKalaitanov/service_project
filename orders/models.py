@@ -33,10 +33,25 @@ class ServiceOption(models.Model):
     #  Указывает, нужно ли поле "period" для этой услуги
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def get_discounted_price(self):
-        """Возвращает цену с учётом скидки"""
-        if self.discount_percentage > 0:
-            return self.price_per_unit * (1 - self.discount_percentage / 100)
+    def get_discounted_price(self, user=None):
+        """Возвращает цену с учётом наибольшей скидки"""
+        user_discount_percentage = 0
+        if user:
+            try:
+                # Если есть индивидуальная скидка, используем её
+                user_discount = UserServiceDiscount.objects.get(user=user, service_option=self)
+                user_discount_percentage = user_discount.discount_percentage if user_discount.discount_percentage > 0 else 0
+            except UserServiceDiscount.DoesNotExist:
+                pass
+
+        # Сравниваем со стандартной скидкой
+        max_discount_percentage = max(user_discount_percentage, self.discount_percentage)
+
+        # Рассчитываем цену с наибольшей скидкой
+        if max_discount_percentage > 0:
+            return self.price_per_unit * (1 - max_discount_percentage / 100)
+
+        # Возвращаем базовую цену, если скидок нет
         return self.price_per_unit
 
     def __str__(self):
@@ -72,6 +87,8 @@ class Order(models.Model):
     quantity = models.IntegerField(
         verbose_name='Количество')  # Количество (лайков, подписчиков и т.д.)
 
+    comment = models.CharField('Комментарий пользователя', max_length=255, blank=True)
+
     total_price = MoneyField(max_digits=10, decimal_places=2,
                              verbose_name='Общая сумма заказа', default=0,
                              default_currency="USD")
@@ -92,14 +109,12 @@ class Order(models.Model):
                                              blank=True, null=True,
                                              verbose_name='Завершено администратором')
 
-    def save(self, *args, **kwargs):
-        if self.status == self.ChoicesStatus.COMPLETED.value and self.completed is None:
-            self.completed = timezone.now()
-        super().save(*args, **kwargs)  # Сохраняем объект перед изменением admin_completed_order
+    # def save(self, *args, **kwargs):
+    #     super().save(*args, **kwargs)
 
     def calculate_total_price(self):
         """Рассчитывает общую стоимость с учётом скидки"""
-        discounted_price = self.service_option.get_discounted_price()  # Получаем цену с учётом скидки
+        discounted_price = self.service_option.get_discounted_price(user=self.user)
         self.total_price = discounted_price * self.quantity
         self.save()
 
@@ -131,3 +146,19 @@ class ReplenishmentBalance(models.Model):
     class Meta:
         verbose_name = 'Заказ на пополнение баланса'
         verbose_name_plural = 'Заказы на пополнение баланса'
+
+
+class UserServiceDiscount(models.Model):
+    """Модель для хранения индивидуальных скидок пользователя на определённые услуги"""
+    user = models.ForeignKey(CustomerUser, on_delete=models.CASCADE, related_name="service_discounts")
+    service_option = models.ForeignKey(ServiceOption, on_delete=models.CASCADE, related_name="user_discounts")
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+                                              verbose_name="Индивидуальная скидка (%)")
+
+    class Meta:
+        verbose_name = "Индивидуальная скидка пользователя"
+        verbose_name_plural = "Индивидуальные скидки пользователей"
+        unique_together = ('user', 'service_option')
+
+    def __str__(self):
+        return f"Скидка {self.discount_percentage}% для {self.user} на {self.service_option}"

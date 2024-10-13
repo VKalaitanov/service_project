@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
     PasswordResetCompleteView
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -10,11 +11,11 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, TemplateView
 
-from .forms import LoginUserForm, RegisterUserForm
-from .utils import account_activation_token, send_verification_email
 from orders.forms import DynamicOrderForm
-from orders.models import Order, Service, ServiceOption
+from orders.models import Order, Service, ServiceOption, UserServiceDiscount
+from .forms import LoginUserForm, RegisterUserForm
 from .service import ControlBalance
+from .utils import account_activation_token, send_verification_email
 
 
 @csrf_exempt
@@ -143,10 +144,16 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
         for service in services:
             service_options = service.options.all()
             for service_option in service_options:
+                user_discount = UserServiceDiscount.objects.filter(
+                    user=self.request.user,
+                    service_option=service_option
+                ).first()
+                user_discount_percentage = user_discount.discount_percentage if user_discount else 0
                 form = DynamicOrderForm(service_option=service_option)
-                forms.append((service, service_option, form))
+                forms.append((service, service_option, form, user_discount_percentage))
 
-        orders = Order.objects.filter(user=self.request.user).order_by('-created_at').select_related('service_option', 'service')
+        orders = Order.objects.filter(user=self.request.user).order_by('-created_at').select_related('service_option',
+                                                                                                     'service')
 
         context['forms'] = forms
         context['services'] = services
@@ -175,12 +182,14 @@ class ProfileUser(LoginRequiredMixin, TemplateView, ControlBalance):
                         custom_data[field_name] = form.cleaned_data[field_name]
 
                     period = form.cleaned_data.get('period') if service_option.has_period else None
+                    comment = form.cleaned_data.get('comment')
 
                     try:
                         self.place_an_order(
                             user=user, service=service_option.service,
                             service_option=service_option, custom_data=custom_data,
-                            quantity=form.cleaned_data['quantity'], period=period
+                            quantity=form.cleaned_data['quantity'], period=period,
+                            comment=comment
                         )
                     except ValueError as e:
                         has_errors = True

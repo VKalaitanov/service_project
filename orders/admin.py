@@ -1,13 +1,17 @@
 from django.contrib import admin
+from django.utils import timezone
+
+from users.models import CustomerUser
 from .forms import ServiceOptionAdminForm
 
-from .models import Service, ServiceOption, Order, ReplenishmentBalance
+from .models import Service, ServiceOption, Order, ReplenishmentBalance, UserServiceDiscount
 
 admin.site.register(Service)
 
 
 class ServiceOptionAdmin(admin.ModelAdmin):
     form = ServiceOptionAdminForm
+    search_fields = ('service__name', 'name')
 
 
 admin.site.register(ServiceOption, ServiceOptionAdmin)
@@ -51,6 +55,7 @@ class OrderAdmin(admin.ModelAdmin):
         'user',
         'custom_data',
         'quantity',
+        'comment',
         'total_price',
         'status',
         'period',
@@ -64,14 +69,16 @@ class OrderAdmin(admin.ModelAdmin):
         'service',
         'service_option',
         'user',
+        'custom_data',
         'quantity',
+        'comment',
         'created_at',
         'total_price',
-        'completed',
         'admin_completed_order'
     ]
 
     list_display = [
+        'get_user_rating_display',
         'user',
         'total_price',
         'service_option',
@@ -85,9 +92,40 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['user']
 
     def save_model(self, request, obj, form, change):
-        if obj.status == obj.ChoicesStatus.COMPLETED.value and obj.completed is None:
+        if obj.status == obj.ChoicesStatus.COMPLETED.value:
+            if obj.completed is None:
+                obj.completed = timezone.now()  # Устанавливаем текущее время, если не указано
             obj.admin_completed_order = request.user.email  # Устанавливаем email администратора
-        obj.save()  # Сохраняем объект без передачи аргумента user
+
+        elif obj.status == obj.ChoicesStatus.RUNNING.value:
+            # Устанавливаем дату завершения по периоду, если она не указана
+            if obj.completed is None and obj.period is not None:
+                if obj.period == obj.PeriodChoices.HOUR.value:
+                    obj.completed = timezone.now() + timezone.timedelta(hours=1)
+                elif obj.period == obj.PeriodChoices.DAY.value:
+                    obj.completed = timezone.now() + timezone.timedelta(days=1)
+                elif obj.period == obj.PeriodChoices.WEEK.value:
+                    obj.completed = timezone.now() + timezone.timedelta(weeks=1)
+                elif obj.period == obj.PeriodChoices.MONTH.value:
+                    obj.completed = timezone.now() + timezone.timedelta(days=30)
+
+        obj.save()  # Сохраняем объект
+
+    def get_user_rating_display(self, obj):
+        """Метод для отображения звёзд вместо цифр"""
+        return dict(CustomerUser.RatingChoice.choices).get(obj.user.rating, obj.user.rating)
+
+    get_user_rating_display.short_description = 'User Rating'  # Название колонки в админке
+    get_user_rating_display.admin_order_field = 'user__rating'  # Добавляем возможность сортировки
 
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(UserServiceDiscount)
+class UserServiceDiscountAdmin(admin.ModelAdmin):
+    list_display = ('user', 'service_option', 'discount_percentage')
+    search_fields = ('user__email', 'service_option__name')
+    list_filter = ('service_option',)
+    # Для удобного выбора пользователя и опции в админке
+    autocomplete_fields = ('user', 'service_option')

@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 import environ
+from django.utils.translation import gettext_lazy as _
 
 env = environ.Env()
 environ.Env.read_env(env_file=Path('./.env'))
@@ -16,11 +17,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(env('DEBUG', default=1))
-# DEBUG = True
+# DEBUG = int(env('DEBUG', default=1))
+DEBUG = True
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
-# ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = env('ALLOWED_HOSTS').split()
+ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ["127.0.0.1", '31.129.102.58']
 CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS').split()
 
@@ -68,7 +69,7 @@ INSTALLED_APPS = [
     'service.apps.ServiceConfig',
     'users.apps.UsersConfig',
     'orders.apps.OrdersConfig',
-    'data_collector.apps.DataCollectorConfig'
+    'data_collector.apps.DataCollectorConfig',
 ]
 
 MIDDLEWARE = [
@@ -97,6 +98,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'users.context_processors.global_messages',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -121,24 +123,23 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('POSTGRES_DB'),
+#         'USER': env('POSTGRES_USER'),
+#         'PASSWORD': env('POSTGRES_PASSWORD'),
+#         'HOST': env('POSTGRES_HOST'),
+#         'PORT': env('POSTGRES_PORT'),
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -181,7 +182,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -220,7 +220,6 @@ LOGIN_REDIRECT_URL = 'users:profile'
 LOGOUT_REDIRECT_URL = 'service:home'
 LOGIN_URL = 'users:login'
 
-
 INSTALLED_APPS += ['axes']
 
 MIDDLEWARE += ['axes.middleware.AxesMiddleware']
@@ -229,3 +228,4 @@ MIDDLEWARE += ['axes.middleware.AxesMiddleware']
 AXES_FAILURE_LIMIT = 5
 AXES_COOLOFF_TIME = timedelta(minutes=1)
 AXES_LOCK_OUT_BY_IP_ONLY = True  # блокировать по IP
+AXES_COOLOFF_MESSAGE = _("Account locked: too many login attempts. Try logging in in a minute.")

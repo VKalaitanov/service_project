@@ -6,6 +6,7 @@ from djmoney.models.fields import MoneyField
 
 class CustomerUserManager(BaseUserManager):
     """Менеджер по созданию суперпользователя"""
+
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('The Email field must be set')
@@ -30,10 +31,23 @@ class CustomerUserManager(BaseUserManager):
 
 class CustomerUser(AbstractUser):
     """Кастомная сущность пользователя"""
+    class RatingChoice(models.IntegerChoices):
+        one = 1, '★☆☆☆☆'
+        two = 2, '★★☆☆☆'
+        three = 3, '★★★☆☆'
+        four = 4, '★★★★☆'
+        five = 5, '★★★★★'
+
     username = models.CharField(blank=True, max_length=20)
     email = models.EmailField(unique=True)
     balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
-
+    rating = models.IntegerField(
+        'Оценка',
+        # blank=True,
+        default=RatingChoice.one,
+        # null=True,
+        choices=RatingChoice.choices
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -65,3 +79,17 @@ class BalanceHistory(models.Model):
     old_balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
     new_balance = MoneyField(decimal_places=2, default=0, default_currency='USD', max_digits=11)
     create_time = models.DateTimeField(auto_now_add=True)
+
+
+class GlobalMessage(models.Model):
+    text = models.TextField("Текст сообщения")
+    is_active = models.BooleanField("Активное", default=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True)
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        verbose_name = "Глобальное сообщение"
+        verbose_name_plural = "Глобальные сообщения"

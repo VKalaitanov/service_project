@@ -93,11 +93,54 @@
     </div>
 </header>
 
+<div id="modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Replenish Balance</h3>
+        <form id="balance-form" method="post" data-url="{% url 'order:create-order' %}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+                <label for="id_email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="id_email" name="email" value="{{ form.email.value }}">
+                {{ form.email.errors }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_balance_for_replenishment" class="form-label">Balance for Replenishment</label>
+                <input type="number" class="form-control" id="id_balance_for_replenishment"
+                       name="balance_for_replenishment"
+                       value="{{ form.balance_for_replenishment.value }}" required>
+                {{ form.balance_for_replenishment.errors }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <div id="balance-form-message" style="display: none;"></div> <!-- Блок для ошибок -->
+    </div>
+</div>
+<div id="success-message" style="display: none;"></div> <!-- Блок для успешного сообщения -->
+
+
+{% if global_messages %}
+<div id="global-messages">
+    {% for message in global_messages %}
+    <!-- Проверка через JS на наличие cookie с ID сообщения -->
+    <div class="global-message" data-message-id="{{ message.id }}">
+        <span>{{ message.text|safe }}</span>
+        <button class="close-message">&times;
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <main>
     <section class="services">
         <h2>Select Services</h2>
         <div class="service-buttons">
-            {% for service, service_option, form in forms %}
+            {% for service, service_option, form, user_discount_percentage in forms %}
             <button class="service-btn" onclick="toggleForm('form-{{ service_option.id }}')">
                 <span>{{ service.name }}</span><br>
                 <span>{{ service_option.name }}</span>
@@ -110,7 +153,7 @@
         {% if order_errors %}
         <div id="error-message" class="error-message">
             {% for error in order_errors %}
-                {{ error }}
+            {{ error }}
             {% endfor %}
         </div>
         {% endif %}
@@ -118,12 +161,13 @@
 
     <!-- Формы для каждого сервиса -->
     <section class="service-forms">
-        {% for service, service_option, form in forms %}
+        {% for service, service_option, form, user_discount_percentage in forms %}
         <div id="form-{{ service_option.id }}" class="service-form" style="display:none;">
             <h3>{{ service.name }} - {{ service_option.name }}</h3>
             <form method="POST" id="myForm-{{ service_option.id }}" class="purchase-form"
                   data-price-per-unit="{{ service_option.price_per_unit }}"
-                  data-discount-percentage="{{ service_option.discount_percentage }}">
+                  data-discount-percentage="{{ service_option.discount_percentage }}"
+                  data-user-discount-percentage="{{ user_discount_percentage|default:0 }}">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input type="hidden" name="service_option_id" value="{{ service_option.id }}">
@@ -133,6 +177,10 @@
                         <span id="total-price-{{ service_option.id }}" class="button-price"></span>
                     </button>
                     <span>
+                        {% if user_discount_percentage %}
+                            User discount price:
+                            <span class="discount-price">- {{ user_discount_percentage }}%</span>
+                        {% endif %}
                         {% if service_option.discount_percentage %}
                             Discount price:
                             <span class="discount-price">- {{ service_option.discount_percentage }}%</span>
@@ -146,7 +194,10 @@
 
     <section class="user-orders">
         <h2>Your Orders</h2>
+        <hr>
+        <!-- Таблица для заказов со статусом "Pending" -->
         {% if orders %}
+        <span>Pending Orders:</span>
         <table>
             <thead>
             <tr>
@@ -157,23 +208,33 @@
                 <th>Period</th>
                 <th>Status</th>
                 <th>Start time</th>
+                <th>End time</th>
             </tr>
             </thead>
             <tbody>
             {% for order in orders %}
+            {% if order.status == 'pending' %}
             <tr>
                 <td>{{ order.service.name }}</td>
                 <td>{{ order.service_option.name }}</td>
                 <td>{{ order.quantity }}</td>
                 <td>{{ order.total_price }}</td>
                 <td>{% if order.period %} {{ order.period }} {% else %} - {% endif %}</td>
-                <td>{{ order.status }}</td>
+                <td>
+                    <span class="status-pending">{{ order.status }}</span>
+                </td>
                 <td>{{ order.created_at }}</td>
+                <td>{% if order.completed %} {{ order.completed }} {% else %} - {% endif %}</td>
             </tr>
+            {% endif %}
             {% endfor %}
             </tbody>
         </table>
-        {% else %}
+        {% endif %}
+
+        <!-- Таблица для заказов со статусом "Running" -->
+        {% if orders %}
+        <span>Running Orders:</span>
         <table>
             <thead>
             <tr>
@@ -181,10 +242,67 @@
                 <th>Category</th>
                 <th>Quantity</th>
                 <th>Total Price</th>
+                <th>Period</th>
                 <th>Status</th>
                 <th>Start time</th>
+                <th>End time</th>
             </tr>
             </thead>
+            <tbody>
+            {% for order in orders %}
+            {% if order.status == 'running' %}
+            <tr>
+                <td>{{ order.service.name }}</td>
+                <td>{{ order.service_option.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.total_price }}</td>
+                <td>{% if order.period %} {{ order.period }} {% else %} - {% endif %}</td>
+                <td>
+                    <span class="status-running">{{ order.status }}</span>
+                </td>
+                <td>{{ order.created_at }}</td>
+                <td>{% if order.completed %} {{ order.completed }} {% else %} - {% endif %}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <!-- Таблица для заказов со статусом "Completed" -->
+        {% if orders %}
+        <span>Completed Orders:</span>
+        <table>
+            <thead>
+            <tr>
+                <th>Service</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Period</th>
+                <th>Status</th>
+                <th>Start time</th>
+                <th>End time</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+            {% if order.status == 'completed' %}
+            <tr>
+                <td>{{ order.service.name }}</td>
+                <td>{{ order.service_option.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.total_price }}</td>
+                <td>{% if order.period %} {{ order.period }} {% else %} - {% endif %}</td>
+                <td>
+                    <span class="status-completed">{{ order.status }}</span>
+                </td>
+                <td>{{ order.created_at }}</td>
+                <td>{% if order.completed %} {{ order.completed }} {% else %} - {% endif %}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+            </tbody>
         </table>
         {% endif %}
     </section>
@@ -210,56 +328,151 @@
 
 <script src="{% static 'users/js/profile_form.js' %}"></script>
 <script src="{% static 'users/js/order_form.js' %}"></script>
+
 <script>
-// Подключение WebSocket для общения с админом
-const roomName = "{{ user.id }}";  // Идентификатор комнаты для текущего пользователя
+    // Подключение WebSocket для общения с админом
+    const roomName = "{{ user.id }}";  // Идентификатор комнаты для текущего пользователя
 
-const chatSocket = new WebSocket(
-    'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
-);
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+    );
 
-// Обработка входящих сообщений
-chatSocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    const chatBody = document.querySelector('#chat-body');
-    const messageElement = document.createElement('p');
-    messageElement.textContent = data.message;
-    chatBody.appendChild(messageElement);
-    chatBody.scrollTop = chatBody.scrollHeight;  // Прокрутить чат вниз
-};
+    // Обработка входящих сообщений
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const chatBody = document.querySelector('#chat-body');
+        const messageElement = document.createElement('p');
+        messageElement.textContent = data.message;
+        chatBody.appendChild(messageElement);
+        chatBody.scrollTop = chatBody.scrollHeight;  // Прокрутить чат вниз
+    };
 
-// Закрытие сокета
-chatSocket.onclose = function(e) {
-    console.error('Chat socket closed unexpectedly');
-};
+    // Закрытие сокета
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
 
-// Отправка сообщений
-document.querySelector('#send-message').onclick = function(e) {
-    const chatInput = document.querySelector('#chat-input');
-    const message = chatInput.value;
+    // Отправка сообщений
+    document.querySelector('#send-message').onclick = function(e) {
+        const chatInput = document.querySelector('#chat-input');
+        const message = chatInput.value;
 
-    if (message.trim() !== '') {
-        chatSocket.send(JSON.stringify({
-            'message': message
-        }));
-        chatInput.value = '';
+        if (message.trim() !== '') {
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            chatInput.value = '';
+        }
+    };
+
+    // Открытие и закрытие чата
+    const chatBox = document.getElementById('chat-box');
+    const chatToggleBtn = document.getElementById('chat-toggle-btn');
+    const closeChatBtn = document.getElementById('close-chat');
+
+    chatToggleBtn.addEventListener('click', function() {
+        chatBox.style.display = 'flex';
+        chatToggleBtn.style.display = 'none';  // Скрыть иконку
+    });
+
+    closeChatBtn.addEventListener('click', function() {
+        chatBox.style.display = 'none';
+        chatToggleBtn.style.display = 'block';  // Показать иконку снова
+    });
+</script>
+
+<script>
+    document.querySelectorAll('.purchase-form').forEach(function(form) {
+        var quantityInput = form.querySelector('input[name="quantity"]');
+        var totalPriceElement = form.querySelector('[id^="total-price"]');
+        var pricePerUnit = parseFloat(form.getAttribute('data-price-per-unit').replace(',', '.').trim());
+
+        // Общая скидка
+        var discountPercentage = parseFloat(form.getAttribute('data-discount-percentage').replace(',', '.').trim()) || 0;
+
+        // Индивидуальная скидка
+        var userDiscountPercentage = parseFloat(form.getAttribute('data-user-discount-percentage').replace(',', '.').trim()) || 0;
+
+        // Применяем максимальную из скидок
+        var effectiveDiscountPercentage = Math.max(discountPercentage, userDiscountPercentage);
+
+        quantityInput.addEventListener('input', function() {
+            var quantity = parseInt(quantityInput.value) || 0;
+            var totalPrice = pricePerUnit * quantity;
+
+            var discount = (totalPrice * effectiveDiscountPercentage) / 100;
+            var finalPrice = totalPrice - discount;
+
+            totalPriceElement.textContent = finalPrice.toFixed(2) + ' $';
+        });
+    });
+
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const errorMessage = document.getElementById("error-message");
+        if (errorMessage) {
+            setTimeout(() => {
+                errorMessage.style.display = "none"; // Скрыть сообщение через 4 секунды
+            }, 4000);
+        }
+    });
+</script>
+
+<script>
+    // Функция для установки cookie
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
     }
-};
 
-// Открытие и закрытие чата
-const chatBox = document.getElementById('chat-box');
-const chatToggleBtn = document.getElementById('chat-toggle-btn');
-const closeChatBtn = document.getElementById('close-chat');
+    // Функция для получения cookie
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
 
-chatToggleBtn.addEventListener('click', function() {
-    chatBox.style.display = 'flex';
-    chatToggleBtn.style.display = 'none';  // Скрыть иконку
-});
+    // Функция для скрытия блока, если все сообщения закрыты
+    function checkAndHideGlobalMessages() {
+        var visibleMessages = document.querySelectorAll('.global-message:not([style*="display: none"])');
+        if (visibleMessages.length === 0) {
+            document.getElementById('global-messages').style.display = 'none';
+        }
+    }
 
-closeChatBtn.addEventListener('click', function() {
-    chatBox.style.display = 'none';
-    chatToggleBtn.style.display = 'block';  // Показать иконку снова
-});
+    // Скрытие сообщений, если они уже закрыты
+    document.querySelectorAll('.global-message').forEach(function (message) {
+        var messageId = message.getAttribute('data-message-id');
+        if (!getCookie('message_' + messageId)) {
+            message.style.display = 'block'; // Показываем только те сообщения, которых нет в cookies
+        }
+    });
+
+    // Обработка клика по кнопке "крестик"
+    document.querySelectorAll('.close-message').forEach(button => {
+        button.addEventListener('click', function () {
+            var message = this.parentElement;
+            var messageId = message.getAttribute('data-message-id');
+            message.style.display = 'none'; // Скрываем сообщение
+            setCookie('message_' + messageId, 'hidden', 30); // Сохраняем в cookie на 30 дней
+            checkAndHideGlobalMessages(); // Проверяем, скрыты ли все сообщения
+        });
+    });
+
+    // Проверяем сразу, нужно ли скрыть весь блок глобальных сообщений
+    checkAndHideGlobalMessages();
 </script>
 </body>
 </html>

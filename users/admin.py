@@ -4,15 +4,16 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from .models import CustomerUser
+from .models import CustomerUser, GlobalMessage
 
 
 @admin.register(CustomerUser)
 class AdminCustomerUser(admin.ModelAdmin):
-    fields = ['email', 'balance', 'order_user', 'sum_order', 'link_for_orders', 'groups', 'get_history_balance']
+    fields = ['rating', 'email', 'balance', 'order_user', 'sum_order', 'link_for_orders', 'groups', 'get_history_balance']
     save_on_top = True
     readonly_fields = ['email', 'order_user', 'sum_order', 'link_for_orders', 'get_history_balance']
-    list_display = ['email', 'balance', 'order_user']
+    list_display = ['rating', 'email', 'balance', 'order_user']
+    list_display_links = ('email', 'rating')
     search_fields = ['email']
     list_editable = ['balance']
     filter_horizontal = ['groups']
@@ -84,3 +85,10 @@ class AdminCustomerUser(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(GlobalMessage)
+class GlobalMessageAdmin(admin.ModelAdmin):
+    list_display = ('text', 'is_active', 'created_at', 'updated_at')
+    list_filter = ('is_active',)
+    search_fields = ('text',)

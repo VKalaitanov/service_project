@@ -222,6 +222,7 @@ tbody td {
 
 .discount-price {
     color: red;
+    margin-right: 20px;
 }
 
 .button-div {
@@ -262,4 +263,34 @@ tbody td {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+#global-messages {
+    /* background-color: #ff0000; */
+    padding: 10px;
+    text-align:center;
+    margin-top: 10px;
+}
+
+.global-message {
+    display: none;
+    background-color: rgba(255, 0, 0, 0.6);
+    padding: 10px;
+}
+
+.close-message {
+    float: right;
+    background: none;
+    border: none; 
+    font-size: 16px;
+}
+
+.status-completed {
+    background-color: green;
+    padding: 3px;
+}
+
+.status-running {
+    background-color: red;
+    padding: 3px;
 }
